@@ -1,0 +1,36 @@
+name: SGAdvanced
+main: net.yeticraft.xxtraineexx.sgadvanced.SGAdvanced
+version: 0.1
+authors: [XxTRAINEExX]
+
+commands:
+  sga:
+    description: Interact with Survival Games Advanced
+    usage: /<command>
+  sgadvanced:
+    description: Interact with Survival Games Advanced
+    usage: /<command>
+permissions:
+    sga.*:
+        description: Gives access to all Survival Games Advaned features
+        children:
+            sga.command: true
+            sga.set: true
+            sga.debug: true
+            sga.reload: true
+            sga.toggle: true
+    sga.command:
+        description: Allows player access to SGA commands
+        default: op
+    sga.set:
+        description: Allows player access to SET command
+        default: op
+    sga.debug:
+        description: Enables SGA debugging
+        default: op
+    sga.reload:
+        description: Reloads config from disk
+        default: op
+    sga.toggle:
+        description: Turns the plugin ON and OFF
+        default: op
