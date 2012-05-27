@@ -1,5 +1,6 @@
 package net.yeticraft.xxtraineexx.sgadvanced;
 
+
 import java.util.logging.Logger;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -23,9 +24,7 @@ public class SGAdvanced extends JavaPlugin{
 	public SGAListener sgaListener;
 	public boolean pluginEnable;
 	public boolean debug;
-	
-
-	
+			
 	public void onEnable() {
 		
 		sgaMatch = new SGAMatch(this);
@@ -80,7 +79,7 @@ public class SGAdvanced extends JavaPlugin{
 		if (debug) {
     		log.info(prefix + "[pluginEnable: " + String.valueOf(pluginEnable) + "]");
     		log.info(prefix + "[debug: " + String.valueOf(debug) + "]");
-   	}
+		}
 		
 	}
 	
