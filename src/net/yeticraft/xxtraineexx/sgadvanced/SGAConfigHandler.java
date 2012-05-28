@@ -61,10 +61,28 @@ public class SGAConfigHandler {
 		return true;
 	}
 	
+	/**
+	 * This method loads a HashSet from a custom yaml config file. The HashSet should be made of
+	 * SGABlockLoc objects. The file should be written with saveBlocks() to maintain the proper 
+	 * format. The method accepts a String called listType which will act as the yaml file name 
+	 * and the KEY value for the stored HashSet.
+	 * 
+	 * Example: Passing this method "chests" will load a file called chests.yml and return the hashset
+	 * stored in the chests.yml under the section called "chests".
+	 *  
+	 * @param listType
+	 * @return HashSet<SGABlockLoc>
+	 * 
+	 */
 	public HashSet<SGABlockLoc> loadBlocks(String listType){
 		
 		File configFile = new File(plugin.getDataFolder(), listType + ".yml");
 		FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
+		
+		if (!configFile.exists()){
+			HashSet<SGABlockLoc> listHash = new HashSet<SGABlockLoc>();
+			return listHash;
+		}
 		
 		@SuppressWarnings("unchecked")
 		HashSet<SGABlockLoc> listHash = (HashSet<SGABlockLoc>) config.get(listType);
