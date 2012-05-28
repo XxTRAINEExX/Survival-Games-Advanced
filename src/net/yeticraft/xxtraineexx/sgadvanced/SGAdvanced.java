@@ -1,6 +1,7 @@
 package net.yeticraft.xxtraineexx.sgadvanced;
 
 
+import java.util.List;
 import java.util.logging.Logger;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -25,6 +26,9 @@ public class SGAdvanced extends JavaPlugin{
 	public SGAListener sgaListener;
 	public boolean pluginEnable;
 	public boolean debug;
+	public List<Integer> breakableBlocks;
+	public boolean setChests;
+	public boolean setPlatforms;
 		
 	 static {
 	        ConfigurationSerialization.registerClass(SGABlockLoc.class, "blockLocs");
@@ -35,6 +39,7 @@ public class SGAdvanced extends JavaPlugin{
 		customConfig = new SGAConfigHandler(this);
 		sgaListener = new SGAListener(this);
 		sgaListener.chestList = customConfig.loadBlocks("chests");
+		sgaListener.platformList = customConfig.loadBlocks("platforms");
 		
 		PluginDescriptionFile pdffile = this.getDescription();
 		loadMainConfig();
@@ -64,12 +69,14 @@ public class SGAdvanced extends JavaPlugin{
     	// Assign all the local variables
        	pluginEnable = config.getBoolean("pluginEnable");
         debug = config.getBoolean("debug");
+        breakableBlocks = config.getIntegerList("breakableBlocks");
         
     	log.info(prefix + "Config loaded.");
+    	
     	if (debug) {
     		log.info(prefix + "[pluginEnable: " + String.valueOf(pluginEnable) + "]");
-    		log.info(prefix + "[debug: " + String.valueOf(debug) + "]");
-    	}
+    		log.info(prefix + "[debug: " + String.valueOf(debug) + "]");}
+    		log.info(prefix + "[breakableBlocks: " + breakableBlocks.toString() + "]");
     	
 	}
 	
@@ -80,12 +87,14 @@ public class SGAdvanced extends JavaPlugin{
 	
 		config.set("pluginEnable", pluginEnable);
 		config.set("debug", debug);
+		config.set("breakableBlocks", breakableBlocks);
 		
 		saveConfig();
 		log.info(prefix + "Config saved.");
 		if (debug) {
     		log.info(prefix + "[pluginEnable: " + String.valueOf(pluginEnable) + "]");
     		log.info(prefix + "[debug: " + String.valueOf(debug) + "]");
+    		log.info(prefix + "[breakableBlocks: " + breakableBlocks.toString() + "]");
 		}
 		
 	}

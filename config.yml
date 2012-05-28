@@ -1,2 +1,6 @@
 pluginEnable: true
 debug: false
+breakableBlocks:
+  - 18
+  - 39
+  - 40

@@ -1,6 +1,6 @@
 name: SGAdvanced
 main: net.yeticraft.xxtraineexx.sgadvanced.SGAdvanced
-version: 0.2
+version: 0.3
 authors: [XxTRAINEExX]
 
 commands:
@@ -12,18 +12,22 @@ commands:
     usage: /<command>
 permissions:
     sga.*:
-        description: Gives access to all Survival Games Advaned features
+        description: Gives access to all Survival Games Advanced features
         children:
             sga.command: true
-            sga.setplatforms: true
+            sga.platforms: true
+            sga.chests: true
             sga.debug: true
             sga.reload: true
             sga.toggle: true
     sga.command:
         description: Allows player access to SGA commands
         default: op
-    sga.setplatforms:
-        description: Allows player access to SET command
+    sga.platforms:
+        description: Allows player access to PLATFORMS command
+        default: op
+    sga.chests:
+        description: Allows player access to CHESTS command
         default: op
     sga.debug:
         description: Enables SGA debugging
