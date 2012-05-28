@@ -8,8 +8,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import java.util.ArrayList
-;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 
 /**
@@ -34,7 +34,9 @@ public class SGACommand implements CommandExecutor{
 	
 	enum SubCommand {
 		HELP,
-		SET,
+		SETPLATFORMS,
+		SAVECHESTS,
+		SHOWCHESTS,
 		DEBUG,
 		RELOAD,
 		TOGGLE,
@@ -49,20 +51,7 @@ public class SGACommand implements CommandExecutor{
 		}
 	}
 	
-	// SetCommands
-	
-	enum SetCommand {
-		PLATFORMS,
-		UNKNOWN;
-		
-		private static SetCommand toSetCommand(String str) {
-			try {
-				return valueOf(str.toUpperCase());
-			} catch (Exception ex) {
-				return UNKNOWN;
-			}
-		}
-	}
+
 	
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 	
@@ -106,14 +95,14 @@ public class SGACommand implements CommandExecutor{
 	    		if (sender.hasPermission("sga.reload")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " RELOAD: Reloads config from disk.");
 	    		if (sender.hasPermission("sga.toggle")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " TOGGLE: Enables/Disables the plugin.");
 	    		break;
-	    	case SET:
-	    		sender.sendMessage(ChatColor.DARK_AQUA + "SGAdvanced SET");
+	    	case SETPLATFORMS:
+	    		sender.sendMessage(ChatColor.DARK_AQUA + "SGAdvanced SETPLATFORMS");
 	    		sender.sendMessage(ChatColor.DARK_AQUA + "====================");
 	    	
 	    		// Check permissions for SET command
 	      		if (isPlayer){
 	    			player = (Player)sender;
-	    			if (!player.hasPermission("sga.set")) {
+	    			if (!player.hasPermission("sga.setplatforms")) {
 	      				sender.sendMessage(ChatColor.DARK_AQUA + "Permissions DENIED.");
 	      				return true;
 	      			}
@@ -133,32 +122,47 @@ public class SGACommand implements CommandExecutor{
 	    			return true;
 	    		}
 
-	    		switch (SetCommand.toSetCommand(args[1].toUpperCase())) {
+	    		//TODO: Code for SETPLATFORMS GOES HERE
 	    		
-	    			case PLATFORMS:
-	    				
-	    				if (plugin.sgaListener.setupPlatforms){
-	    					plugin.sgaListener.setupPlatforms = false;	
-	    					//TODO: Save current blocks to disk
-	    					sender.sendMessage(ChatColor.AQUA +  "Starting Platforms Saved: " + plugin.sgaMatch.platforms.size());
-	    					
-	    				}
-	    				else{
-	    					plugin.sgaListener.setupPlatforms = true;
-	    					plugin.sgaMatch.platforms.clear();
-		    				sender.sendMessage(ChatColor.AQUA +  "All existing platforms removed.");
-		    				sender.sendMessage(ChatColor.AQUA +  "Your hand is now ready to set platforms. Punch all blocks you want to be included as a starting platform.");
-			    		}
-	    				return true;
-	    				
-	    			case UNKNOWN:
-	    				sender.sendMessage(ChatColor.AQUA +  "Unknown command. Use /sga SET to list available commands.");
-	    	    		return true;
+	    		break;
+	    	case SAVECHESTS:
+	    		sender.sendMessage(ChatColor.DARK_AQUA + "SGAdvanced SAVECHESTS");
+	    		sender.sendMessage(ChatColor.DARK_AQUA + "====================");
+	    	
+	    		//TODO Check permissions for SAVECHESTS command
+	
+	    		// Did they type too many parameters?
+	    		if (args.length > 1)
+	    		{
+	    			sender.sendMessage(ChatColor.AQUA +  "Too manyparameters! Try /SGA SAVECHESTS");
+	    			return true;
+	    		}
 	    		
+	    		plugin.customConfig.saveBlocks("chests",plugin.sgaListener.chestList);
+	    		break;	    		
+	    	case SHOWCHESTS:
+	    		sender.sendMessage(ChatColor.DARK_AQUA + "SGAdvanced PRINTCHESTS");
+	    		sender.sendMessage(ChatColor.DARK_AQUA + "====================");
+	    	
+	    		//TODO Check permissions for PRINTCHESTS command
+	
+	    		// Did they type too many parameters?
+	    		if (args.length > 1)
+	    		{
+	    			sender.sendMessage(ChatColor.AQUA +  "Too manyparameters! Try /SGA PRINTCHESTS");
+	    			return true;
+	    		}
+	    		
+	    		Iterator<SGABlockLoc> itr = plugin.sgaListener.chestList.iterator();
+
+	    		while (itr.hasNext()){
+	    			SGABlockLoc currentChest = itr.next();
+	    		    sender.sendMessage(currentChest.toString());
 	    		}
 	    		
 	    		break;
-	      	case DEBUG:
+	    	
+	    	case DEBUG:
 	      		
 	      		sender.sendMessage(ChatColor.DARK_AQUA + "SGAdvanced");
 	      		sender.sendMessage(ChatColor.DARK_AQUA + "===============");

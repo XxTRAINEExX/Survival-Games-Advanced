@@ -15,14 +15,14 @@ permissions:
         description: Gives access to all Survival Games Advaned features
         children:
             sga.command: true
-            sga.set: true
+            sga.setplatforms: true
             sga.debug: true
             sga.reload: true
             sga.toggle: true
     sga.command:
         description: Allows player access to SGA commands
         default: op
-    sga.set:
+    sga.setplatforms:
         description: Allows player access to SET command
         default: op
     sga.debug:

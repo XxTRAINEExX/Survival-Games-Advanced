@@ -4,6 +4,7 @@ package net.yeticraft.xxtraineexx.sgadvanced;
 import java.util.logging.Logger;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -20,15 +21,21 @@ public class SGAdvanced extends JavaPlugin{
 	public final Logger log = Logger.getLogger("Minecraft");
 	public String prefix = "[SGAdvanced] ";
 	public FileConfiguration config;
-	public SGAMatch sgaMatch;
+	public SGAConfigHandler customConfig;
 	public SGAListener sgaListener;
 	public boolean pluginEnable;
 	public boolean debug;
-			
+		
+	 static {
+	        ConfigurationSerialization.registerClass(SGABlockLoc.class, "blockLocs");
+	 }
+	
 	public void onEnable() {
 		
-		sgaMatch = new SGAMatch(this);
+		customConfig = new SGAConfigHandler(this);
 		sgaListener = new SGAListener(this);
+		sgaListener.chestList = customConfig.loadBlocks("chests");
+		
 		PluginDescriptionFile pdffile = this.getDescription();
 		loadMainConfig();
 		CommandExecutor MSCCommandExecutor = new SGACommand(this);
