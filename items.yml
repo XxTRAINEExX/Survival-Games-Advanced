@@ -1,0 +1,55 @@
+foodList:
+   39: 3 #brown mushroom
+   40: 3 #red mushroom
+   260: 1 #apple
+   349: 1 #raw fish
+   354: 1 #cake
+   357: 1 #cookie
+   360: 1 #melon slice
+   363: 1 #raw beef
+   365: 1 #raw chicken
+   367: 1 #rotten flesh 
+   281: 3 #bowl
+   297: 1 #bread
+   319: 1 #raw porkchop
+   322: 1 #golden apple
+   296: 1 #wheat
+   320: 1 #cooked porkchop
+   366: 1 #cooked chicken
+   350: 1 #cooked fish
+   364: 1 #steak
+supplyList:
+   264: 1 #diamond
+   265: 1 #iron ingot
+   266: 1 #gold ingot
+   280: 1 #stick
+   334: 1 #leather
+   318: 1 #flint
+   287: 1 #string
+   288: 1 #feather
+   333: 1 #boat
+   346: 1 #fishing rod
+weaponsList:
+   261: 1 #bow
+   262: 1 #arrow
+   268: 1 #wooden sword
+   271: 1 #wooden axe
+   272: 1 #stone sword
+   275: 1 #stone axe
+armorList:
+   298: 1 #leather cap
+   299: 1 #leather tunic
+   300: 1 #leather pants
+   301: 1 #leather boots
+   302: 1 #chain helmet
+   303: 1 #chain chestplate
+   304: 1 #chain leggings
+   305: 1 #chain boots
+   306: 1 #iron helmet
+   307: 1 #iron chestplate
+   308: 1 #iron leggings
+   309: 1 #iron boots
+   314: 1 #gold helmet
+   315: 1 #gold chestplate
+   316: 1 #gold leggings
+   317: 1 #gold boots

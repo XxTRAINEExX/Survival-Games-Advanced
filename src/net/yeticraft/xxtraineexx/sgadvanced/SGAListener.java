@@ -40,6 +40,9 @@ public class SGAListener implements Listener{
 		// If plugin is disabled, exit.
 		if (!plugin.pluginEnable) return;
 		
+		// If world is not the survival games world, exit.
+		if (!plugin.worldName.equalsIgnoreCase(e.getBlock().getWorld().toString())) return;
+		
 		// Player is setting chests, has permissions, and the block is a chest
 		if (plugin.setChests && e.getPlayer().hasPermission("sga.chests") && e.getBlock().getTypeId() == 54){
 			SGABlockLoc blockLoc = new SGABlockLoc(e.getBlock().getLocation());
@@ -63,6 +66,10 @@ public class SGAListener implements Listener{
     	// If plugin is disabled, exit.
     	if (!plugin.pluginEnable) return;
     	
+    	// If world is not the survival games world, exit.
+    	if (!plugin.worldName.equalsIgnoreCase(e.getBlock().getWorld().toString())) return;
+    			
+    	
     	// If player is setting chests, has permissions, and the block is a chest.
     	if (plugin.setChests && e.getPlayer().hasPermission("sga.chests")  && e.getBlock().getTypeId() == 54) {
     		SGABlockLoc blockLoc = new SGABlockLoc(e.getBlock().getLocation());
@@ -81,11 +88,19 @@ public class SGAListener implements Listener{
     	// If plugin is disabled, exit.
     	if (!plugin.pluginEnable) return;
     	
-		// Player is setting up platforms, and has permissions.
+    	// If world is not the survival games world, exit.
+    	if (!plugin.worldName.equalsIgnoreCase(e.getBlock().getWorld().toString())) return;
+    	
+    	// Player is setting up platforms, and has permissions.
 		if (plugin.setPlatforms && e.getPlayer().hasPermission("sga.platforms")){
 			SGABlockLoc blockLoc = new SGABlockLoc(e.getBlock().getLocation());
-			platformList.add(blockLoc);
-			e.getPlayer().sendMessage(ChatColor.AQUA + "Platform added to memory: " + e.getBlock().getLocation().toString());
+			
+			if (platformList.contains(blockLoc)){
+				platformList.remove(blockLoc);
+				e.getPlayer().sendMessage(ChatColor.AQUA + "Platform removed from memory: " + e.getBlock().getLocation().toString());}
+			else{
+				platformList.add(blockLoc);	
+				e.getPlayer().sendMessage(ChatColor.AQUA + "Platform added to memory: " + e.getBlock().getLocation().toString());}
 			e.getPlayer().sendMessage(ChatColor.AQUA + "When you are finished adding platforms, run the SET command again and SAVE");
 			e.setCancelled(true);
 			return;}
