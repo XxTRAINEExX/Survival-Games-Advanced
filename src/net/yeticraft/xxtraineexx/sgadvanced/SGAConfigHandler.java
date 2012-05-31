@@ -1,8 +1,10 @@
 package net.yeticraft.xxtraineexx.sgadvanced;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -33,17 +35,12 @@ public class SGAConfigHandler {
 		// Lets see if the item config exists. If not we need to create it.
 		if (!itemConfigFile.exists()){
 			if (plugin.debug) plugin.log.info(plugin.prefix + "items.yml file not found on disk.  Loading default from JAR");
-			InputStream itemConfigStream = getClass().getResourceAsStream("/items.yml");
-			itemConfig = YamlConfiguration.loadConfiguration(itemConfigStream);
-			
-		    try {
-		    	itemConfig.save(itemConfigFile);} 
-		    catch (IOException ex) {
-		        Logger.getLogger(JavaPlugin.class.getName()).log(Level.SEVERE, "Could not save config to " + itemConfigFile, ex);}}
+	    	copy(plugin.getResource("items.yml"), itemConfigFile);}
 		else{
-			itemConfig = YamlConfiguration.loadConfiguration(itemConfigFile);
 			if (plugin.debug) plugin.log.info(plugin.prefix + "items.yml found on disk. Loading...");}
-
+		
+		itemConfig = YamlConfiguration.loadConfiguration(itemConfigFile);
+		
 		// Loading item lists from items.yml
 		Set<String> food = itemConfig.getConfigurationSection("foodList").getKeys(true);
 		Set<String> supplies = itemConfig.getConfigurationSection("supplyList").getKeys(true);
@@ -134,6 +131,21 @@ public class SGAConfigHandler {
 		HashSet<SGABlockLoc> listHash = (HashSet<SGABlockLoc>) config.get(listType);
 		return listHash;
 		
+	}
+	
+	private void copy(InputStream in, File file) {
+	    try {
+	        OutputStream out = new FileOutputStream(file);
+	        byte[] buf = new byte[1024];
+	        int len;
+	        while((len=in.read(buf))>0){
+	            out.write(buf,0,len);
+	        }
+	        out.close();
+	        in.close();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
 	}
 	
 	
