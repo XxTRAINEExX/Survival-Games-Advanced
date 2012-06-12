@@ -25,12 +25,14 @@ public class SGAdvanced extends JavaPlugin{
 	public FileConfiguration config;
 	public SGAConfigHandler customConfig;
 	public SGAListener sgaListener;
+	public SGAEvents sgaEvents;
 	public boolean pluginEnable;
 	public boolean debug;
 	public List<Integer> breakableBlocks;
 	public String worldName;
 	public boolean setChests;
 	public boolean setPlatforms;
+	public int maxServerPlayers;
 	public HashMap<Integer, Integer> foodList = new HashMap<Integer, Integer>();
 	public HashMap<Integer, Integer> supplyList = new HashMap<Integer, Integer>();
 	public HashMap<Integer, Integer> weaponsList = new HashMap<Integer, Integer>();
@@ -45,13 +47,15 @@ public class SGAdvanced extends JavaPlugin{
 		loadMainConfig();
 		customConfig = new SGAConfigHandler(this);
 		sgaListener = new SGAListener(this);
+		sgaEvents = new SGAEvents(this);
 		sgaListener.chestList = customConfig.loadBlocks("chests");
 		sgaListener.platformList = customConfig.loadBlocks("platforms");
 		customConfig.loadItems();
 		PluginDescriptionFile pdffile = this.getDescription();
 		CommandExecutor MSCCommandExecutor = new SGACommand(this);
 		getCommand("sgadvanced").setExecutor(MSCCommandExecutor);
-    	getCommand("sga").setExecutor(MSCCommandExecutor);  	
+    	getCommand("sga").setExecutor(MSCCommandExecutor);  
+    	maxServerPlayers = this.getServer().getMaxPlayers();
     	log.info(prefix + " " + pdffile.getVersion() + " Enabled"); 	
     	
 	}
