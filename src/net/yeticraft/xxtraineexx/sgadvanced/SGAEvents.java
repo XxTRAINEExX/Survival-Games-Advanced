@@ -1,5 +1,14 @@
 package net.yeticraft.xxtraineexx.sgadvanced;
 
+import java.util.Iterator;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+
+
 public class SGAEvents {
 	public static SGAdvanced plugin;
 	
@@ -14,7 +23,15 @@ public class SGAEvents {
 	 */
 	public boolean teleportPlayers(){
 		
-		//TODO: Loop through alive players and teleport them all to platforms
+        //Loop through alive players and teleport them all to platforms
+	    Iterator<SGABlockLoc> itr = plugin.sgaListener.platformList.iterator();
+	    int i=0;
+	    while((itr.hasNext()) && (i < plugin.alivePlayerList.size())){
+	        SGABlockLoc platform = itr.next();
+	        plugin.alivePlayerList.get(i).teleport(platform.toLocation());
+	        if (plugin.debug) plugin.log.info("Teleporting [" + plugin.alivePlayerList.get(i) + "] to platform located at [" + platform.toString() + "]");
+	        i++;
+	    }
 		return true;
 	}
 	
@@ -22,33 +39,50 @@ public class SGAEvents {
 	 * This method will be used when a player dies.
 	 * @return
 	 */
-	public boolean playerDeath(){
+	public boolean playerDeath(Player player){
 		
-		//TODO: Mark as dead
-		//TODO: squat
-		//TODO: create thunder/lightning
-		
-		return true;
+	    // Lightning strike
+        Location l = new Location(Bukkit.getWorld(plugin.worldName), 0, 200, 0);
+        Bukkit.getServer().getWorld(plugin.worldName).strikeLightning(l);
+
+        // Move them to the appropriate list
+	    plugin.alivePlayerList.remove(player);
+	    plugin.deadPlayerList.add(player);
+	    
+		// Hide dead person
+	    for (Player alivePlayer : plugin.alivePlayerList) {
+            if (!alivePlayer.equals(player) && alivePlayer.canSee(player)) {
+                alivePlayer.hidePlayer(player);
+            }
+        }
+	    
+	    // Allow dead person to fly, give them potion speed
+	    player.setAllowFlight(true);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 6000, 0));
+        
+	    /* Temporarily taking this out to see if lightning creates a canon-like sound. If not I will put this back in.
+	    // Start/stop thundering over 3 seconds
+	    Bukkit.getServer().getWorld(plugin.worldName).setThundering(true);
+        plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+		    public void run() {
+		        Bukkit.getServer().getWorld(plugin.worldName).setThundering(false);
+		        }
+		 }, 60L);
+	    */
+	    
+        // Teleporting player to middle.
+	    player.teleport(l);
+	    
+	    return true;
 
 	}
 	
 	
 	/**
-	 * This method will be used to queue a player for survival Games (or remove them from the queue)
+	 * This method will toggle someone in the queue.
 	 * @return
 	 */
-	public boolean queuePlayer(){
-		
-		//TODO: Add player to queue
-		return true;
-	}
-	
-	
-	/**
-	 * This method will adjust the queue based on someone leaving the server or choosing not to play.
-	 * @return
-	 */
-	public boolean unqueuePlayer(){
+	public boolean toggleQueue(){
 		
 		//TODO: Adjust list of players in queue
 		//TODO: Send message to all players waiting to play
@@ -97,7 +131,10 @@ public class SGAEvents {
 	 * @return
 	 */
 	public boolean deathMatch(){
-		return true;
+
+	    //TODO: create deathmatch boundary
+	    //TODO: Teleport alive players
+	    return true;
 	}
 	
 	/**
@@ -105,6 +142,10 @@ public class SGAEvents {
 	 * @return
 	 */
 	public boolean deathMatchVote(){
+	    
+	    //TODO: Initiate deatmatchvote
+	    //TODO: TALLY responses
+	    //TODO: call deathmatch and reduce time if vote passes
 		return true;
 	}
 	
@@ -114,6 +155,9 @@ public class SGAEvents {
 	 * @return
 	 */
 	public boolean spectateMatch(){
+	    
+	    //TODO: Toggle player between normal world and SG world
+	    
 		return true;
 	}
 	
@@ -122,6 +166,8 @@ public class SGAEvents {
 	 * @return
 	 */
 	public boolean fillChests(){
+	    
+	    //TODO: Cycle through all chests and fill them
 		return true;
 	}
 	

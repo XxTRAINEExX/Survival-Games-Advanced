@@ -2,11 +2,15 @@ package net.yeticraft.xxtraineexx.sgadvanced;
 
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
+
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -33,6 +37,9 @@ public class SGAdvanced extends JavaPlugin{
 	public boolean setChests;
 	public boolean setPlatforms;
 	public int maxServerPlayers;
+	LinkedList<Player> playerQueue = new LinkedList<Player>();
+	LinkedList<Player> alivePlayerList = new LinkedList<Player>();
+	LinkedList<Player> deadPlayerList = new LinkedList<Player>();
 	public HashMap<Integer, Integer> foodList = new HashMap<Integer, Integer>();
 	public HashMap<Integer, Integer> supplyList = new HashMap<Integer, Integer>();
 	public HashMap<Integer, Integer> weaponsList = new HashMap<Integer, Integer>();
@@ -52,10 +59,11 @@ public class SGAdvanced extends JavaPlugin{
 		sgaListener.platformList = customConfig.loadBlocks("platforms");
 		customConfig.loadItems();
 		PluginDescriptionFile pdffile = this.getDescription();
-		CommandExecutor MSCCommandExecutor = new SGACommand(this);
-		getCommand("sgadvanced").setExecutor(MSCCommandExecutor);
-    	getCommand("sga").setExecutor(MSCCommandExecutor);  
+		CommandExecutor SGACommandExecutor = new SGACommand(this);
+		getCommand("sgadvanced").setExecutor(SGACommandExecutor);
+    	getCommand("sga").setExecutor(SGACommandExecutor);  
     	maxServerPlayers = this.getServer().getMaxPlayers();
+    	Bukkit.getServer().getWorld(worldName).setThunderDuration(40);
     	log.info(prefix + " " + pdffile.getVersion() + " Enabled"); 	
     	
 	}

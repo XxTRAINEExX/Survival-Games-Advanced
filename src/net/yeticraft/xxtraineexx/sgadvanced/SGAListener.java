@@ -3,6 +3,10 @@ package net.yeticraft.xxtraineexx.sgadvanced;
 import java.util.HashSet;
 
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.ExperienceOrb;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -10,6 +14,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 
 
@@ -34,6 +43,10 @@ public class SGAListener implements Listener{
 		
 	}
 	
+	/**
+	 * Monitoring this event so we can prevent block breaking
+	 * @param e
+	 */
 	@EventHandler(priority = EventPriority.NORMAL)
 	public void onBlockBreak(BlockBreakEvent e) {	
 		
@@ -43,15 +56,6 @@ public class SGAListener implements Listener{
 		// If world is not the survival games world, exit.
 		if (!plugin.worldName.equalsIgnoreCase(e.getBlock().getWorld().toString())) return;
 		
-		// Player is setting chests, has permissions, and the block is a chest
-		if (plugin.setChests && e.getPlayer().hasPermission("sga.chests") && e.getBlock().getTypeId() == 54){
-			SGABlockLoc blockLoc = new SGABlockLoc(e.getBlock().getLocation());
-			if (chestList.contains(blockLoc)) {
-				chestList.remove(blockLoc);
-				e.getPlayer().sendMessage(ChatColor.AQUA + "Chest removed from memory: " + e.getBlock().getLocation().toString());
-				e.getPlayer().sendMessage(ChatColor.AQUA + "When you are finished remove chests, run the SET command again and SAVE");}
-			return;}
-		 
 		// Checking block to see if its on the break list. If so, allow break and return.
 		int blockType = e.getBlock().getTypeId();
 		if (plugin.breakableBlocks.contains(blockType)) return;
@@ -60,6 +64,10 @@ public class SGAListener implements Listener{
 		e.setCancelled(true);
 		return;}
 	
+	/**
+	 * Monitoring this event so we can prevent block placement
+	 * @param e
+	 */
     @EventHandler(priority = EventPriority.NORMAL)
     public void onBlockPlace(BlockPlaceEvent e) {
 	
@@ -68,20 +76,15 @@ public class SGAListener implements Listener{
     	
     	// If world is not the survival games world, exit.
     	if (!plugin.worldName.equalsIgnoreCase(e.getBlock().getWorld().toString())) return;
-    			
-    	
-    	// If player is setting chests, has permissions, and the block is a chest.
-    	if (plugin.setChests && e.getPlayer().hasPermission("sga.chests")  && e.getBlock().getTypeId() == 54) {
-    		SGABlockLoc blockLoc = new SGABlockLoc(e.getBlock().getLocation());
-			chestList.add(blockLoc);
-			e.getPlayer().sendMessage(ChatColor.AQUA + "Chest added to memory: " + e.getBlock().getLocation().toString());
-			e.getPlayer().sendMessage(ChatColor.AQUA + "When you are finished adding chests, run the SET command again and SAVE");
-			return;}
-    	
+    		
     	// Cancel the place and return
     	e.setCancelled(true);
     	return;}
     	
+    /**
+     * Monitoring this event so we can set up platforms and chests.
+     * @param e
+     */
     @EventHandler(priority = EventPriority.NORMAL)
     public void onBlockDamage(BlockDamageEvent e) {
     	
@@ -104,12 +107,92 @@ public class SGAListener implements Listener{
 			e.getPlayer().sendMessage(ChatColor.AQUA + "When you are finished adding platforms, run the SET command again and SAVE");
 			e.setCancelled(true);
 			return;}
-    	
-		// Return
-		return;
 		
+		// If player is setting chests, has permissions, and the block is a chest.
+        if (plugin.setChests && e.getPlayer().hasPermission("sga.chests")  && e.getBlock().getTypeId() == 54) {
+            SGABlockLoc blockLoc = new SGABlockLoc(e.getBlock().getLocation());
+            
+            if (chestList.contains(blockLoc)){
+                chestList.remove(blockLoc);
+                e.getPlayer().sendMessage(ChatColor.AQUA + "Chest removed from memory: " + e.getBlock().getLocation().toString());}
+            else{
+                chestList.add(blockLoc);
+                e.getPlayer().sendMessage(ChatColor.AQUA + "Chest added to memory: " + e.getBlock().getLocation().toString());}
+            e.getPlayer().sendMessage(ChatColor.AQUA + "When you are finished adding chests, run the SET command again and SAVE");
+            e.setCancelled(true);
+            return;}
     }
     
-     
+    /**
+     * Monitoring this event to stop dead player from being further damaged
+     * We also use this to prevent dead players from hurting others.
+     * @param event
+     */
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onEntityDamage(EntityDamageEvent event) {
+        
+        if (event.isCancelled() || (event.getDamage() == 0)) return;
+        Entity entity = event.getEntity();
+        if (!(entity instanceof Player)) return;
+        Player player = (Player)entity;
+        // Code to handle standard e damage
+        if (!plugin.deadPlayerList.contains(player)) return;
+        // Code to handle e v. e damage
+        if (event instanceof EntityDamageByEntityEvent){
+            EntityDamageByEntityEvent damageByEntityEvent = (EntityDamageByEntityEvent) event;
+            Entity attacker = damageByEntityEvent.getDamager();
+            if (attacker instanceof Projectile) attacker = ((Projectile)attacker).getShooter();
+            if (attacker instanceof Player) return;
+            Player attackerPlayer = (Player) attacker;
+            if (!plugin.deadPlayerList.contains(attackerPlayer)) return;
+        }
+        
+        // Looks like this is a dead player. Let's cancel their fire ticks, cancel event, and setdamage to 0
+        if (entity.getFireTicks()>0) entity.setFireTicks(0);
+        event.setDamage(0);
+        event.setCancelled(true);
+        
+    }
+    
+    /**
+     * Monitoring this eveng because we want to prevent monsters targeting dead players.
+     * We also use this event to stop XP orbs from traveling to dead players
+     * @param event
+     */
+    @EventHandler(priority = EventPriority.NORMAL)
+    void onEntityTarget(EntityTargetEvent event) {
+        if (event.isCancelled()) return;
+        Entity target = event.getTarget();
+        Entity entity = event.getEntity();
+        if (!(target instanceof Player)) return;
+        Player player = (Player)target;
+        if (!plugin.deadPlayerList.contains(player)) return;
+        event.setTarget(null);
+        if (entity instanceof ExperienceOrb) entity.setVelocity(null);
+    }
+    
+    /**
+     * Monitoring this event because we want to prevent items picked up by dead players
+     * @param event
+     */
+    @EventHandler(priority = EventPriority.LOW)
+    void onItemPickUp(PlayerPickupItemEvent event) {
+        if (event.isCancelled() ) return;
+        Player player = event.getPlayer();
+        if (!plugin.deadPlayerList.contains(player)) return;
+        event.setCancelled(true);
+    }
+    
+    /**
+     * Monitoring this event because we want to cancel drops done by dead players
+     * @param event
+     */
+    @EventHandler(priority = EventPriority.LOW)
+    void onItemDrop(PlayerDropItemEvent event) {
+        if (event.isCancelled() ) return;
+        Player player = event.getPlayer();
+        if (!plugin.deadPlayerList.contains(player)) return;
+        event.setCancelled(true);
+    }
     
 }
