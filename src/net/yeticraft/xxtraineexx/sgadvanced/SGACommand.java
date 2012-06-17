@@ -35,6 +35,7 @@ public class SGACommand implements CommandExecutor{
 		DEBUG,
 		RELOAD,
 		TOGGLE,
+		SETUPMODE,
 		UNKNOWN;
 		
 		private static SubCommand toSubCommand(String str) {
@@ -313,6 +314,42 @@ public class SGACommand implements CommandExecutor{
 		    			plugin.log.info(plugin.prefix + "Plugin enabled by: " + player.getName());}
 	    			else{
 	    				plugin.log.info(plugin.prefix + "Plugin enabled by: console");}}
+	    		
+	    		// Save the new setting to disk
+	    		plugin.saveMainConfig();
+	    		return true;
+	    	
+	    	// ***************************** SETUPMODE  COMMAND ****************************	
+	      	case SETUPMODE:
+	      		sender.sendMessage(ChatColor.DARK_AQUA + "SGAdvanced SETUPMODE");
+	      		sender.sendMessage(ChatColor.DARK_AQUA + "=================");
+	    		
+	    		// Check permissions for SETUPMODE command
+    			if (!sender.hasPermission("sga.setupmode")) {
+    				sender.sendMessage(ChatColor.AQUA + "Permissions DENIED.");
+    				return true;}
+    			// Too many params?
+	    		if (args.length > 1){
+	    			sender.sendMessage(ChatColor.AQUA + "Too manyparameters! Try /SGA SETUPMODE");
+	    			return true;}
+	    		
+	    		// Enable the plugin for SETUP MODE
+	    		if (plugin.setupMode) {
+	    			plugin.setupMode = false;
+	    			sender.sendMessage(ChatColor.AQUA + "Setup Mode Disabled!");
+	    			if (isPlayer){
+		    			player = (Player)sender;
+		    			plugin.log.info(plugin.prefix + "Setup Mode disabled by: " + player.getName());}
+	    			else{
+	    				plugin.log.info(plugin.prefix + "Setup Mode disabled by: console");}}
+	    		else{
+	    			plugin.setupMode = true;
+	    			sender.sendMessage(ChatColor.AQUA + "Setup Mode Enabled!");
+	    			if (isPlayer){
+		    			player = (Player)sender;
+		    			plugin.log.info(plugin.prefix + "Setup Mode enabled by: " + player.getName());}
+	    			else{
+	    				plugin.log.info(plugin.prefix + "Setup Mode enabled by: console");}}
 	    		
 	    		// Save the new setting to disk
 	    		plugin.saveMainConfig();

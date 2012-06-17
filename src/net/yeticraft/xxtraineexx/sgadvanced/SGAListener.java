@@ -53,6 +53,9 @@ public class SGAListener implements Listener{
 		// If plugin is disabled, exit.
 		if (!plugin.pluginEnable) return;
 		
+		// If the world is currently being set up, we should not process the block break event.
+		if (plugin.setupMode) return;
+		
 		// If world is not the survival games world, exit.
 		if (!plugin.worldName.equalsIgnoreCase(e.getBlock().getWorld().toString())) return;
 		
@@ -74,6 +77,9 @@ public class SGAListener implements Listener{
     	// If plugin is disabled, exit.
     	if (!plugin.pluginEnable) return;
     	
+		// If the world is currently being set up, we should not process the block place event.
+		if (plugin.setupMode) return;
+    	
     	// If world is not the survival games world, exit.
     	if (!plugin.worldName.equalsIgnoreCase(e.getBlock().getWorld().toString())) return;
     		
@@ -93,6 +99,9 @@ public class SGAListener implements Listener{
     	
     	// If world is not the survival games world, exit.
     	if (!plugin.worldName.equalsIgnoreCase(e.getBlock().getWorld().toString())) return;
+    	
+		// If the world is NOT currently being set up, we should NOT process the block damage event.
+		if (!plugin.setupMode) return;
     	
     	// Player is setting up platforms, and has permissions.
 		if (plugin.setPlatforms && e.getPlayer().hasPermission("sga.platforms")){
@@ -131,6 +140,9 @@ public class SGAListener implements Listener{
     @EventHandler(priority = EventPriority.NORMAL)
     public void onEntityDamage(EntityDamageEvent event) {
         
+		// If the world is currently being set up, we should not process the entity damage event.
+		if (plugin.setupMode) return;
+    	
         if (event.isCancelled() || (event.getDamage() == 0)) return;
         Entity entity = event.getEntity();
         if (!(entity instanceof Player)) return;
@@ -161,6 +173,10 @@ public class SGAListener implements Listener{
      */
     @EventHandler(priority = EventPriority.NORMAL)
     void onEntityTarget(EntityTargetEvent event) {
+    	
+		// If the world is currently being set up, we should not process the entity target event.
+		if (plugin.setupMode) return;
+    	
         if (event.isCancelled()) return;
         Entity target = event.getTarget();
         Entity entity = event.getEntity();
@@ -177,6 +193,10 @@ public class SGAListener implements Listener{
      */
     @EventHandler(priority = EventPriority.LOW)
     void onItemPickUp(PlayerPickupItemEvent event) {
+    	
+		// If the world is currently being set up, we should not process the onItemPickup event.
+		if (plugin.setupMode) return;
+    	
         if (event.isCancelled() ) return;
         Player player = event.getPlayer();
         if (!plugin.deadPlayerList.contains(player)) return;
@@ -189,6 +209,10 @@ public class SGAListener implements Listener{
      */
     @EventHandler(priority = EventPriority.LOW)
     void onItemDrop(PlayerDropItemEvent event) {
+    	
+		// If the world is currently being set up, we should not process the onItemDrop event.
+		if (plugin.setupMode) return;
+    	
         if (event.isCancelled() ) return;
         Player player = event.getPlayer();
         if (!plugin.deadPlayerList.contains(player)) return;

@@ -171,4 +171,20 @@ public class SGAEvents {
 		return true;
 	}
 	
+	public boolean regenWorld(){
+		
+		//TODO: Roll back world
+		return true;
+	}
+	
+	public boolean unloadPlayerInventory(){
+		//TODO: unload all items and store on disk
+		return true;
+	}
+	
+	public boolean loadPLayerInventory(){
+		//TODO: empty player inventory from SG map
+		//TODO: load all items from disk and return to player
+		return true;
+	}
 }

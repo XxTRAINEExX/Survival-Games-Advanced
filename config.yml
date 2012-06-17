@@ -5,3 +5,4 @@ breakableBlocks:
   - 39
   - 40
 worldName: survivalgames
+setupMode: false

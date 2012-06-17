@@ -34,6 +34,7 @@ public class SGAdvanced extends JavaPlugin{
 	public boolean debug;
 	public List<Integer> breakableBlocks;
 	public String worldName;
+	public boolean setupMode;
 	public boolean setChests;
 	public boolean setPlatforms;
 	public int maxServerPlayers;
@@ -89,6 +90,7 @@ public class SGAdvanced extends JavaPlugin{
         debug = config.getBoolean("debug");
         breakableBlocks = config.getIntegerList("breakableBlocks");
         worldName = config.getString("worldName");
+        setupMode = config.getBoolean("setupMode");
         
     	log.info(prefix + "Config loaded.");
     	
@@ -97,6 +99,7 @@ public class SGAdvanced extends JavaPlugin{
     		log.info(prefix + "[debug: " + String.valueOf(debug) + "]");}
     		log.info(prefix + "[breakableBlocks: " + breakableBlocks.toString() + "]");
     		log.info(prefix + "[worldName: " + worldName + "]");
+    		log.info(prefix + "[setupMode: " + setupMode + "]");
     	
 	}
 	
@@ -109,6 +112,7 @@ public class SGAdvanced extends JavaPlugin{
 		config.set("debug", debug);
 		config.set("breakableBlocks", breakableBlocks);
 		config.set("worldName", worldName);
+		config.set("setupMode", setupMode);
 		
 		saveConfig();
 		log.info(prefix + "Config saved.");
@@ -117,6 +121,7 @@ public class SGAdvanced extends JavaPlugin{
     		log.info(prefix + "[debug: " + String.valueOf(debug) + "]");
     		log.info(prefix + "[breakableBlocks: " + breakableBlocks.toString() + "]");
     		log.info(prefix + "[worldName: " + worldName + "]");
+    		log.info(prefix + "[setupMode: " + setupMode + "]");
 		}
 		
 	}
