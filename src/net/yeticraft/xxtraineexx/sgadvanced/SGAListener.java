@@ -2,7 +2,9 @@ package net.yeticraft.xxtraineexx.sgadvanced;
 
 import java.util.HashSet;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
@@ -18,6 +20,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 
@@ -191,7 +194,7 @@ public class SGAListener implements Listener{
      * Monitoring this event because we want to prevent items picked up by dead players
      * @param event
      */
-    @EventHandler(priority = EventPriority.LOW)
+    @EventHandler(priority = EventPriority.NORMAL)
     void onItemPickUp(PlayerPickupItemEvent event) {
     	
 		// If the world is currently being set up, we should not process the onItemPickup event.
@@ -207,7 +210,7 @@ public class SGAListener implements Listener{
      * Monitoring this event because we want to cancel drops done by dead players
      * @param event
      */
-    @EventHandler(priority = EventPriority.LOW)
+    @EventHandler(priority = EventPriority.NORMAL)
     void onItemDrop(PlayerDropItemEvent event) {
     	
 		// If the world is currently being set up, we should not process the onItemDrop event.
@@ -217,6 +220,26 @@ public class SGAListener implements Listener{
         Player player = event.getPlayer();
         if (!plugin.deadPlayerList.contains(player)) return;
         event.setCancelled(true);
+    }
+    
+    /**
+     * Monitoring this event because we want to keep people on platforms when the match is starting
+     * @param event
+     */
+    @EventHandler(priority = EventPriority.NORMAL)
+    void onPlayerMove(PlayerMoveEvent event){
+    	
+    	if (!plugin.sgaEvents.platformBoobyTrap) return;
+    	
+    	// Looks like the platforms are booby trapped... we need to make sure no one is moving from their platform
+    	Player player = event.getPlayer();
+    	Location platformLoc = plugin.sgaEvents.playerPlatform.get(player);
+    	if (player.getLocation().distance(platformLoc) > 1){
+    		player.sendMessage(plugin.prefix + "You've left the platform before the game started.");
+    		Bukkit.getServer().getWorld(plugin.worldName).strikeLightning(player.getLocation());
+    		player.setHealth(0);
+    	}
+    	
     }
     
 }

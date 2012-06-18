@@ -1,17 +1,26 @@
 package net.yeticraft.xxtraineexx.sgadvanced;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.ListIterator;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 
 public class SGAEvents {
 	public static SGAdvanced plugin;
-	
+	public boolean platformBoobyTrap;
+	public HashMap<Player, Location> playerPlatform = new HashMap<Player, Location>();
+	public HashMap<Player, Location> playerHome = new HashMap<Player, Location>();
+	public HashMap<Player, ItemStack[]> playerInventory = new HashMap<Player, ItemStack[]>();
 	
 	public SGAEvents(SGAdvanced plugin) {
 		SGAEvents.plugin = plugin;	
@@ -28,7 +37,11 @@ public class SGAEvents {
 	    int i=0;
 	    while((itr.hasNext()) && (i < plugin.alivePlayerList.size())){
 	        SGABlockLoc platform = itr.next();
-	        plugin.alivePlayerList.get(i).teleport(platform.toLocation());
+	        Player currentPlayer = plugin.alivePlayerList.get(i);
+	        // Teleport player to platform
+	        currentPlayer.teleport(platform.toLocation());
+	        // Assign player to platform
+	        playerPlatform.put(currentPlayer, platform.toLocation());
 	        if (plugin.debug) plugin.log.info("Teleporting [" + plugin.alivePlayerList.get(i) + "] to platform located at [" + platform.toString() + "]");
 	        i++;
 	    }
@@ -79,24 +92,50 @@ public class SGAEvents {
 	
 	
 	/**
-	 * This method will toggle someone in the queue.
+	 * This method will pull someone from the game lists and shift a queued player in to the appropriate list.
 	 * @return
 	 */
-	public boolean toggleQueue(){
+	public boolean playerLeave(Player leavingPlayer){
 		
-		//TODO: Adjust list of players in queue
-		//TODO: Send message to all players waiting to play
-		return true;
-	}
-	
-	/**
-	 * This method will mark platforms as booby trapped or remove the booby trap. (Instantly killing players 
-	 * leaving the platform)
-	 * @return
-	 */
-	public boolean boobyTrapPlatforms(){
 		
-		//TODO: Toggle platform booby trap 
+		boolean alive = true;
+		if (plugin.alivePlayerList.contains(leavingPlayer)) {
+			plugin.alivePlayerList.remove(leavingPlayer);	
+		}
+		if (plugin.deadPlayerList.contains(leavingPlayer)) {
+			plugin.deadPlayerList.remove(leavingPlayer);
+			alive=false;
+		}
+		// Checking the queue to see if someone needs to be shifted in
+		if (plugin.playerQueue.size() > 0){
+			Player joiningPlayer = plugin.playerQueue.get(0);
+			if (alive) {
+				plugin.alivePlayerList.add(joiningPlayer);
+			}
+			else {
+				plugin.deadPlayerList.add(joiningPlayer);
+			}
+			joiningPlayer.sendMessage(plugin.prefix + "You are now entering the game.");
+			// Now that they've been moved to the game we will remove them from the queue
+			plugin.playerQueue.remove(joiningPlayer);
+			
+			// Telling all other players they are moving up in the queue
+			for (int i = 0; i < plugin.playerQueue.size(); i++){
+				Player currentPlayer = plugin.playerQueue.get(i);
+				currentPlayer.sendMessage(plugin.prefix + "You have been moved to queue position: " + i+1);
+			}
+		}
+		// Remove special abilities from player
+	    leavingPlayer.setAllowFlight(false);
+	    leavingPlayer.removePotionEffect(PotionEffectType.SPEED);
+        
+	    // giving back their items
+	    loadPlayerInventory(leavingPlayer);
+
+	    // teleporting them to their home location
+		leavingPlayer.teleport(playerHome.get(leavingPlayer));
+		playerHome.remove(leavingPlayer);
+	    
 		return true;
 	}
 	
@@ -106,11 +145,42 @@ public class SGAEvents {
 	 */
 	public boolean startMatch(){
 		
-		//TODO: Store players current locations in home world
+		// Move everyone from dead player list to alive player list
+		for (int i=0; i < plugin.deadPlayerList.size(); i++){
+			plugin.alivePlayerList.add(plugin.deadPlayerList.get(i));
+		}
+		plugin.deadPlayerList.clear();
+		
+		// store everyones current location if they arent already in the game
+		for (int i=0; i < plugin.alivePlayerList.size(); i++){
+			
+			// Checking to see if they are already in the game
+			Player currentPlayer = plugin.alivePlayerList.get(i);
+			if (!currentPlayer.getWorld().equals(Bukkit.getWorld(plugin.worldName))){
+				playerHome.put(currentPlayer, currentPlayer.getLocation());
+				PlayerInventory playerInv = currentPlayer.getInventory();
+				
+				// Iterating through the players inventory so we can store it elsewhere
+				HashSet<ItemStack> playerInventory = new HashSet<ItemStack>();
+				ListIterator< ItemStack > itr = playerInv.iterator();
+				while (itr.hasNext()){
+					ItemStack currentItemStack = itr.next();
+					playerInventory.add(currentItemStack);
+				}
+				
+				//Their inventory is now in the hashmap so we can clear it.
+				currentPlayer.getInventory().clear();
+				//TODO: save this inventory to disk in case the server crashes
+			}
+			
+			
+		}
 		//TODO: Fill chests
-		//TODO: boobytrapplatforms
+		platformBoobyTrap = true;
+		
 		//TODO: Store player items and strip from player
-		//TODO: teleport players
+		
+		teleportPlayers();
 		
 		return true;
 	}
@@ -120,6 +190,20 @@ public class SGAEvents {
 	 * @return
 	 */
 	public boolean endMatch(){
+		
+		// Move everyone from dead player list to alive player list
+		for (int i=0; i < plugin.deadPlayerList.size(); i++){
+			plugin.alivePlayerList.add(plugin.deadPlayerList.get(i));
+		}
+		plugin.deadPlayerList.clear();
+		
+		// Make everyone visible and turn off flymode
+	    for (Player alivePlayer : plugin.alivePlayerList) {
+            if (!alivePlayer.equals(alivePlayer) && !alivePlayer.canSee(alivePlayer)) {
+                alivePlayer.showPlayer(alivePlayer);
+            }
+        }
+	    
 		//TODO: Toggle all players visible
 		//TODO: Return player items
 		//TODO: teleport players to their starting locations in home world
@@ -177,13 +261,23 @@ public class SGAEvents {
 		return true;
 	}
 	
-	public boolean unloadPlayerInventory(){
-		//TODO: unload all items and store on disk
+	public boolean unloadPlayerInventory(Player player){
+		
+		// Putting the players inventory in a hashmap so we can get it later.
+		playerInventory.put(player, player.getInventory().getContents());
+		player.getInventory().clear();
+		//TODO: save these items to disk in case the server crashes
 		return true;
 	}
 	
-	public boolean loadPLayerInventory(){
-		//TODO: empty player inventory from SG map
+	/**
+	 * This method will clear their current inventory and load the inventory from the hashmap
+	 * @param player
+	 * @return
+	 */
+	public boolean loadPlayerInventory(Player player){
+	    player.getInventory().clear();
+	    player.getInventory().setContents(playerInventory.get(player));
 		//TODO: load all items from disk and return to player
 		return true;
 	}
