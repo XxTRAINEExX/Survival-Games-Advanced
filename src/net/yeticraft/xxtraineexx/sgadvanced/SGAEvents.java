@@ -1,16 +1,18 @@
 package net.yeticraft.xxtraineexx.sgadvanced;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.ListIterator;
+import java.util.LinkedList;
+import java.util.Random;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -18,6 +20,7 @@ import org.bukkit.potion.PotionEffectType;
 public class SGAEvents {
 	public static SGAdvanced plugin;
 	public boolean platformBoobyTrap;
+	public boolean deathmatch = false;
 	public HashMap<Player, Location> playerPlatform = new HashMap<Player, Location>();
 	public HashMap<Player, Location> playerHome = new HashMap<Player, Location>();
 	public HashMap<Player, ItemStack[]> playerInventory = new HashMap<Player, ItemStack[]>();
@@ -157,29 +160,13 @@ public class SGAEvents {
 			// Checking to see if they are already in the game
 			Player currentPlayer = plugin.alivePlayerList.get(i);
 			if (!currentPlayer.getWorld().equals(Bukkit.getWorld(plugin.worldName))){
-				playerHome.put(currentPlayer, currentPlayer.getLocation());
-				PlayerInventory playerInv = currentPlayer.getInventory();
-				
-				// Iterating through the players inventory so we can store it elsewhere
-				HashSet<ItemStack> playerInventory = new HashSet<ItemStack>();
-				ListIterator< ItemStack > itr = playerInv.iterator();
-				while (itr.hasNext()){
-					ItemStack currentItemStack = itr.next();
-					playerInventory.add(currentItemStack);
-				}
-				
-				//Their inventory is now in the hashmap so we can clear it.
-				currentPlayer.getInventory().clear();
-				//TODO: save this inventory to disk in case the server crashes
+				unloadPlayerInventory(currentPlayer);
 			}
 			
 			
 		}
-		//TODO: Fill chests
+		fillChests();
 		platformBoobyTrap = true;
-		
-		//TODO: Store player items and strip from player
-		
 		teleportPlayers();
 		
 		return true;
@@ -195,18 +182,32 @@ public class SGAEvents {
 		for (int i=0; i < plugin.deadPlayerList.size(); i++){
 			plugin.alivePlayerList.add(plugin.deadPlayerList.get(i));
 		}
+	
+		// Clearing all variables
 		plugin.deadPlayerList.clear();
-		
-		// Make everyone visible and turn off flymode
+		deathmatch = false;
+		platformBoobyTrap = false;
+		playerPlatform.clear();
+	
 	    for (Player alivePlayer : plugin.alivePlayerList) {
-            if (!alivePlayer.equals(alivePlayer) && !alivePlayer.canSee(alivePlayer)) {
-                alivePlayer.showPlayer(alivePlayer);
-            }
+	        
+	        // Making sure everyone can see the alivePlayer
+	        for (Player otherPlayer : plugin.alivePlayerList) {
+	            if (!otherPlayer.equals(alivePlayer) && !otherPlayer.canSee(alivePlayer)) {
+	                otherPlayer.showPlayer(alivePlayer);
+	            }
+	        }
+	        
+	        // Making sure aliveplayer is not flying
+	        alivePlayer.setAllowFlight(false);
+	        // Making sure the aliveplayer does not have potion effect
+	        alivePlayer.removePotionEffect(PotionEffectType.SPEED);
+	        // Returning player items
+	        loadPlayerInventory(alivePlayer);
+	        // Teleport player to their home location
+	        alivePlayer.teleport(playerHome.get(alivePlayer));
+	        
         }
-	    
-		//TODO: Toggle all players visible
-		//TODO: Return player items
-		//TODO: teleport players to their starting locations in home world
 		return true;
 	}
 	
@@ -216,9 +217,10 @@ public class SGAEvents {
 	 */
 	public boolean deathMatch(){
 
-	    //TODO: create deathmatch boundary
-	    //TODO: Teleport alive players
+	    deathmatch = true;
+	    teleportPlayers();
 	    return true;
+	    
 	}
 	
 	/**
@@ -238,9 +240,54 @@ public class SGAEvents {
 	 * where they can build/play while waiting for the next SG to begin.
 	 * @return
 	 */
-	public boolean spectateMatch(){
+	public boolean spectateMatch(Player player){
 	    
-	    //TODO: Toggle player between normal world and SG world
+	    // If player is not currently on the dead player list we should return out.
+	    if (!plugin.deadPlayerList.contains(player)) return true;
+	    
+	    if (player.getWorld().equals(Bukkit.getWorld(plugin.worldName))){
+
+	        // Remove special abilities from player
+	        player.setAllowFlight(false);
+	        player.removePotionEffect(PotionEffectType.SPEED);
+	        
+	        // clearing their SG inventory
+	        player.getInventory().clear();
+	        // giving back their real world inventory
+            loadPlayerInventory(player);
+
+	        // teleporting them to their home location
+	        player.teleport(playerHome.get(player));
+	        
+	        // Making them visible to everyone
+	        for (Player otherPlayer : plugin.alivePlayerList) {
+                if (!otherPlayer.equals(player) && !otherPlayer.canSee(player)) {
+                    otherPlayer.showPlayer(player);
+                }
+            }
+	    }
+	    else{
+
+            // Making them invisible to everyone
+            for (Player otherPlayer : plugin.alivePlayerList) {
+                if (!otherPlayer.equals(player) && !otherPlayer.canSee(player)) {
+                    otherPlayer.showPlayer(player);
+                }
+            }
+
+	        // add special abilities to player
+            player.setAllowFlight(true);
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 6000, 0));
+            
+            // unload player inventory
+            unloadPlayerInventory(player);
+            // clearing their main world inventory
+            player.getInventory().clear();
+            
+            // teleporting them to the SG world
+            player.teleport(plugin.spawnLoc);
+            
+	    }
 	    
 		return true;
 	}
@@ -252,17 +299,79 @@ public class SGAEvents {
 	public boolean fillChests(){
 	    
 	    //TODO: Cycle through all chests and fill them
+	    // TODO: clear all items from the chests
+	   
+	    // TODO: This needs to be a clone of an object... not a reference
+	    LinkedList<Integer> tempList = new LinkedList<Integer>();
+	    
+	    tempList = plugin.itemList;
+	    
+	    Random randomGenerator = new Random();
+	    	    
+	    Iterator<SGABlockLoc> itr = plugin.sgaListener.chestList.iterator();
+	    while (itr.hasNext()){
+	        Location currentLoc = itr.next().toLocation();
+	        Block currentBlock = Bukkit.getWorld(plugin.worldName).getBlockAt(currentLoc);
+	        Chest currentChest = (Chest) currentBlock;
+	        Inventory currentInventory = currentChest.getBlockInventory();
+	        //Clear the inventory of this chest
+	        currentInventory.clear();
+	        // This random number will represent the quantity of items in the chest (currently 0-5)
+	        int itemsInChest = randomGenerator.nextInt(6);
+	        // lets loop a set number of times based on the random number we just generated
+	        for (int i=0; i < itemsInChest; i++){
+	            // We will use the following random number to find an item in the list.
+	            int listIndex = randomGenerator.nextInt(tempList.size());
+	            // Creating a new itemstack by pulling the item from the list based on the index we just found randomly
+	            ItemStack newStack = new ItemStack(tempList.get(listIndex), 1);
+	            // Adding this itemstack to the currentInventory
+	            currentInventory.addItem(newStack);            
+	            // Removing this particular item from the list so we cant add it again.
+	            tempList.remove(listIndex);
+	        }
+
+	        // Once this loop is complete we will have filled 1 chest with a random number of items. 
+	        // Now we need to proceed to the next chest.
+	        
+	        
+	    }
+        
+        
+	    
 		return true;
 	}
 	
 	public boolean regenWorld(){
 		
-		//TODO: Roll back world
-		return true;
+	    // Iterate through the hashmap to replace each broken block
+	    for (Location currentLoc: plugin.sgaListener.blockLog.keySet()){
+	        Block currentBlock = currentLoc.getBlock();
+            Block oldBlock = plugin.sgaListener.blockLog.get(currentLoc);
+            
+            // Reset the currentBlock
+            currentBlock.setTypeId(oldBlock.getTypeId());
+            currentBlock.setData(oldBlock.getData());
+            
+            // remove this block from the map
+            plugin.sgaListener.blockLog.remove(currentLoc);
+	    }
+	    
+	    // block log should be clear.. but lets do it anyway.
+	    plugin.sgaListener.blockLog.clear();
+	    
+	    // Iterate through entities on the ground and remove them
+	    for (Entity e: Bukkit.getWorld(plugin.worldName).getEntities()){
+	        if(e.getType().toString().equalsIgnoreCase("DROPPED_ITEM")){
+	            e.remove();
+	        }
+	    }
+	    
+	    return true;
 	}
 	
 	public boolean unloadPlayerInventory(Player player){
 		
+	    //TODO: This needs to be a copy of the object... not a reference
 		// Putting the players inventory in a hashmap so we can get it later.
 		playerInventory.put(player, player.getInventory().getContents());
 		player.getInventory().clear();
@@ -276,6 +385,7 @@ public class SGAEvents {
 	 * @return
 	 */
 	public boolean loadPlayerInventory(Player player){
+	    
 	    player.getInventory().clear();
 	    player.getInventory().setContents(playerInventory.get(player));
 		//TODO: load all items from disk and return to player

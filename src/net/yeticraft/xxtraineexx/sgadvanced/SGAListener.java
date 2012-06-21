@@ -1,10 +1,12 @@
 package net.yeticraft.xxtraineexx.sgadvanced;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
@@ -31,6 +33,7 @@ public class SGAListener implements Listener{
 	public boolean setupPlatforms; 
 	public HashSet<SGABlockLoc> chestList;
 	public HashSet<SGABlockLoc> platformList;
+	public HashMap<Location, Block> blockLog = new HashMap<Location, Block>();
 	
 	public SGAListener(SGAdvanced plugin) {
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -62,9 +65,13 @@ public class SGAListener implements Listener{
 		// If world is not the survival games world, exit.
 		if (!plugin.worldName.equalsIgnoreCase(e.getBlock().getWorld().toString())) return;
 		
-		// Checking block to see if its on the break list. If so, allow break and return.
+		// Checking block to see if its on the break list. If so, allow break, log it, and return.
 		int blockType = e.getBlock().getTypeId();
-		if (plugin.breakableBlocks.contains(blockType)) return;
+		if (plugin.breakableBlocks.contains(blockType)){
+		    // TODO: This need to be a copy of the object.. not a reference.
+		    blockLog.put(e.getBlock().getLocation(), e.getBlock());
+		    return;
+		}
 		
 		// Block is not on the list, cancel the break and return.
 		e.setCancelled(true);
@@ -229,15 +236,25 @@ public class SGAListener implements Listener{
     @EventHandler(priority = EventPriority.NORMAL)
     void onPlayerMove(PlayerMoveEvent event){
     	
-    	if (!plugin.sgaEvents.platformBoobyTrap) return;
+    	if (plugin.sgaEvents.platformBoobyTrap){
+    	    // Looks like the platforms are booby trapped... we need to make sure no one is moving from their platform
+    	    Player player = event.getPlayer();
+    	    Location platformLoc = plugin.sgaEvents.playerPlatform.get(player);
+    	    if (player.getLocation().distance(platformLoc) > 1){
+    	        player.sendMessage(plugin.prefix + "You've left the platform before the game started.");
+    		    Bukkit.getServer().getWorld(plugin.worldName).strikeLightning(player.getLocation());
+    		    player.setHealth(0);
+    	    }
+    	}
     	
-    	// Looks like the platforms are booby trapped... we need to make sure no one is moving from their platform
-    	Player player = event.getPlayer();
-    	Location platformLoc = plugin.sgaEvents.playerPlatform.get(player);
-    	if (player.getLocation().distance(platformLoc) > 1){
-    		player.sendMessage(plugin.prefix + "You've left the platform before the game started.");
-    		Bukkit.getServer().getWorld(plugin.worldName).strikeLightning(player.getLocation());
-    		player.setHealth(0);
+    	if (plugin.sgaEvents.deathmatch){
+    	 // Looks like we are in a deathmatch, we need to make sure eveyrone stays inside the boundary
+            Player player = event.getPlayer();
+            if (player.getLocation().distance(plugin.spawnLoc) > plugin.deathmatchBoundary){
+                player.sendMessage(plugin.prefix + "Coward! You've wandered to far from the deathmatch.");
+                Bukkit.getServer().getWorld(plugin.worldName).strikeLightning(player.getLocation());
+                player.setHealth(0);
+            }
     	}
     	
     }

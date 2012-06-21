@@ -78,6 +78,32 @@ public class SGAConfigHandler {
 	    	int currentArmor = Integer.parseInt(ita.next());
 	     	plugin.armorList.put(currentArmor, itemConfig.getInt("armorList." + String.valueOf(currentArmor)));}
 
+	    // Inflating aggregate list
+	    // Looping through the foodlist
+        for (Integer currentItem: plugin.foodList.keySet()){
+            for (int i = 0; i < plugin.foodList.get(currentItem); i++) {
+                plugin.itemList.add(currentItem);    
+            }
+        }
+       // Looping through the supplyList
+        for (Integer currentItem: plugin.supplyList.keySet()){
+            for (int i = 0; i < plugin.supplyList.get(currentItem); i++) {
+                plugin.itemList.add(currentItem);    
+            }
+        }
+        // Looping through the weaponList
+        for (Integer currentItem: plugin.weaponsList.keySet()){
+            for (int i = 0; i < plugin.weaponsList.get(currentItem); i++) {
+                plugin.itemList.add(currentItem);    
+            }
+        }
+        // Looping through the armorlist
+        for (Integer currentItem: plugin.armorList.keySet()){
+            for (int i = 0; i < plugin.armorList.get(currentItem); i++) {
+                plugin.itemList.add(currentItem);    
+            }
+        }
+	    
 		if (plugin.debug){
 			plugin.log.info(plugin.prefix + "Loaded FoodList: " + plugin.foodList.toString());
 			plugin.log.info(plugin.prefix + "Loaded SupplyList: " + plugin.supplyList.toString());

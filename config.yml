@@ -6,3 +6,8 @@ breakableBlocks:
   - 40
 worldName: survivalgames
 setupMode: false
+deathmatchBoundary: 30
+spawnLoc:
+  - 0
+  - 80
+  - 0

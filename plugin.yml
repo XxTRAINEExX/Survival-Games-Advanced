@@ -1,6 +1,6 @@
 name: SGAdvanced
 main: net.yeticraft.xxtraineexx.sgadvanced.SGAdvanced
-version: 0.4
+version: 0.4.2
 authors: [XxTRAINEExX]
 
 commands:

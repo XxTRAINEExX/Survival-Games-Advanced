@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
@@ -35,6 +36,8 @@ public class SGAdvanced extends JavaPlugin{
 	public List<Integer> breakableBlocks;
 	public String worldName;
 	public boolean setupMode;
+	public int deathmatchBoundary;
+	public Location spawnLoc;
 	public boolean setChests;
 	public boolean setPlatforms;
 	public int maxServerPlayers;
@@ -45,6 +48,7 @@ public class SGAdvanced extends JavaPlugin{
 	public HashMap<Integer, Integer> supplyList = new HashMap<Integer, Integer>();
 	public HashMap<Integer, Integer> weaponsList = new HashMap<Integer, Integer>();
 	public HashMap<Integer, Integer> armorList = new HashMap<Integer, Integer>();
+	public LinkedList<Integer> itemList = new LinkedList<Integer>();
 		
 	 static {
 	        ConfigurationSerialization.registerClass(SGABlockLoc.class, "blockLocs");
@@ -91,7 +95,10 @@ public class SGAdvanced extends JavaPlugin{
         breakableBlocks = config.getIntegerList("breakableBlocks");
         worldName = config.getString("worldName");
         setupMode = config.getBoolean("setupMode");
-        
+        deathmatchBoundary = config.getInt("deathmatchBoundary");
+        List<Integer> spawnLocValues = config.getIntegerList("spawnLoc");
+        Location spawnLoc = new Location(Bukkit.getWorld(worldName), spawnLocValues.get(0).doubleValue(), spawnLocValues.get(1).doubleValue(), spawnLocValues.get(2).doubleValue());;
+                
     	log.info(prefix + "Config loaded.");
     	
     	if (debug) {
@@ -100,7 +107,9 @@ public class SGAdvanced extends JavaPlugin{
     		log.info(prefix + "[breakableBlocks: " + breakableBlocks.toString() + "]");
     		log.info(prefix + "[worldName: " + worldName + "]");
     		log.info(prefix + "[setupMode: " + setupMode + "]");
-    	
+    		log.info(prefix + "[deathmatchBoundary: " + deathmatchBoundary + "]");
+    		log.info(prefix + "[spawnLoc: " + spawnLoc.toString() + "]");
+    		
 	}
 	
 	/**
@@ -113,6 +122,8 @@ public class SGAdvanced extends JavaPlugin{
 		config.set("breakableBlocks", breakableBlocks);
 		config.set("worldName", worldName);
 		config.set("setupMode", setupMode);
+		config.set("deathmatchBoundary", deathmatchBoundary);
+		config.set("spawnLoc", spawnLoc);
 		
 		saveConfig();
 		log.info(prefix + "Config saved.");
@@ -122,6 +133,8 @@ public class SGAdvanced extends JavaPlugin{
     		log.info(prefix + "[breakableBlocks: " + breakableBlocks.toString() + "]");
     		log.info(prefix + "[worldName: " + worldName + "]");
     		log.info(prefix + "[setupMode: " + setupMode + "]");
+    		log.info(prefix + "[deathmatchBoundary: " + deathmatchBoundary + "]");
+    		log.info(prefix + "[spawnLoc: " + spawnLoc.toString() + "]");
 		}
 		
 	}
