@@ -336,6 +336,7 @@ public class SGAEvents {
 	        
 	    }
         
+	    //TODO: What happens if we run out of chests before the items are used up? What happens if we run out of items before chests are done looping?
         
 	    
 		return true;
