@@ -298,63 +298,73 @@ public class SGAEvents {
 	 */
 	public boolean fillChests(){
 	    
-	    //TODO: Cycle through all chests and fill them
-	    // TODO: clear all items from the chests
-	   
-	    // TODO: This needs to be a clone of an object... not a reference
-	    LinkedList<Integer> tempList = new LinkedList<Integer>();
+	    // Making a deep copy of the itemList so we can manipulate it while not affecting the source itemList
+	    LinkedList<Integer> tempItemList = new LinkedList<Integer>(); // This is the temporary itemList we will be manipulating
+	    Iterator<Integer> itemItr = plugin.itemList.iterator();
+	    while (itemItr.hasNext()){
+	        int tempInt = itemItr.next();
+	        tempItemList.add(tempInt);
+        }
 	    
-	    tempList = plugin.itemList;
-	    
-	    Random randomGenerator = new Random();
-	    	    
-	    Iterator<SGABlockLoc> itr = plugin.sgaListener.chestList.iterator();
-	    while (itr.hasNext()){
-	        Location currentLoc = itr.next().toLocation();
-	        Block currentBlock = Bukkit.getWorld(plugin.worldName).getBlockAt(currentLoc);
-	        Chest currentChest = (Chest) currentBlock;
-	        Inventory currentInventory = currentChest.getBlockInventory();
-	        //Clear the inventory of this chest
-	        currentInventory.clear();
-	        // This random number will represent the quantity of items in the chest (currently 0-5)
-	        int itemsInChest = randomGenerator.nextInt(6);
-	        // lets loop a set number of times based on the random number we just generated
-	        for (int i=0; i < itemsInChest; i++){
-	            // We will use the following random number to find an item in the list.
-	            int listIndex = randomGenerator.nextInt(tempList.size());
-	            // Creating a new itemstack by pulling the item from the list based on the index we just found randomly
-	            ItemStack newStack = new ItemStack(tempList.get(listIndex), 1);
-	            // Adding this itemstack to the currentInventory
-	            currentInventory.addItem(newStack);            
-	            // Removing this particular item from the list so we cant add it again.
-	            tempList.remove(listIndex);
-	        }
-
-	        // Once this loop is complete we will have filled 1 chest with a random number of items. 
-	        // Now we need to proceed to the next chest.
+	    // Moving the chest hashset to a linked list so we can move through it sequentially without affecting the source hashset
+	    LinkedList<Chest> tempChestList = new LinkedList<Chest>(); // This is the temporary chestList we will be using (Since our original is a hashset)
+	    Iterator<SGABlockLoc> chestItr = plugin.sgaListener.chestList.iterator();
+        while (chestItr.hasNext()){
+            SGABlockLoc tempChest = new SGABlockLoc(chestItr.next());
+            Location currentLoc = tempChest.toLocation(); // Loc of the chest
+            Block currentBlock = Bukkit.getWorld(plugin.worldName).getBlockAt(currentLoc); // Block holding the chest
+            Chest currentChest = (Chest) currentBlock; // Chest object casted from block
+            Inventory currentInventory = currentChest.getInventory(); // Inventory from the given chest
+            currentInventory.clear(); // Clearing the current inventory
+            tempChestList.add(currentChest);
+        }
+        
+	    // Creating a random number object so we can do some randoms
+        Random randomGenerator = new Random();
+        // Using the following index to step through the chests sequantially
+        int chestIndex = 0;
+        // Continuing to loop through the item list until all items have been placed in chests.
+	    while (tempItemList.size() > 0){
 	        
+	        // First checking to make sure the temporary chest index has not exceed the actual number of chests in the linkedList.
+	        // If so we will reset the chest index back to 0 so we can start over.
+	       if (tempChestList.size() > chestIndex){
+	            
+	           boolean populateChest = randomGenerator.nextBoolean(); // Do we fill the chest or not?
+	           if (populateChest){
+	                Chest currentChest = tempChestList.get(chestIndex); // Chest object from list
+	                Inventory currentInventory = currentChest.getInventory(); // Inventory from the given chest
+	                // We will use the following random number to find an item in the list.
+	                int listIndex = randomGenerator.nextInt(tempItemList.size());
+	                // Creating a new itemstack by pulling the item from the list based on the index we just found randomly
+	                ItemStack newStack = new ItemStack(tempItemList.get(listIndex), 1);
+	                // Adding this itemstack to the currentInventory
+	                currentInventory.addItem(newStack);            
+	                // Removing this particular item from the list so we cant add it again.
+	                tempItemList.remove(listIndex);
+	            }
+	            chestIndex++;
+
+	       }
+	        else{
+	            chestIndex=0;
+	        }
 	        
 	    }
         
-	    //TODO: What happens if we run out of chests before the items are used up? What happens if we run out of items before chests are done looping?
-        
-	    
-		return true;
+	    return true;
 	}
 	
 	public boolean regenWorld(){
 		
 	    // Iterate through the hashmap to replace each broken block
-	    for (Location currentLoc: plugin.sgaListener.blockLog.keySet()){
-	        Block currentBlock = currentLoc.getBlock();
-            Block oldBlock = plugin.sgaListener.blockLog.get(currentLoc);
-            
-            // Reset the currentBlock
-            currentBlock.setTypeId(oldBlock.getTypeId());
-            currentBlock.setData(oldBlock.getData());
-            
-            // remove this block from the map
-            plugin.sgaListener.blockLog.remove(currentLoc);
+	    Iterator<SGABlockLoc> it = plugin.sgaListener.blockLog.iterator();
+	    while (it.hasNext()){
+	        SGABlockLoc oldBlock = it.next();
+	        Block currentBlock = Bukkit.getWorld(plugin.worldName).getBlockAt(oldBlock.toLocation());
+	        currentBlock.setTypeId(oldBlock.getTypeId());
+	        currentBlock.setData(oldBlock.getData());
+            plugin.sgaListener.blockLog.remove(oldBlock); // remove this block from the map
 	    }
 	    
 	    // block log should be clear.. but lets do it anyway.
@@ -387,6 +397,7 @@ public class SGAEvents {
 	 */
 	public boolean loadPlayerInventory(Player player){
 	    
+	    // TODO: Make sure this is a copy of hte inventory we are restoring...
 	    player.getInventory().clear();
 	    player.getInventory().setContents(playerInventory.get(player));
 		//TODO: load all items from disk and return to player

@@ -124,7 +124,7 @@ public class SGAConfigHandler {
 		try {
 	        config.save(configFile);
 	    } catch (IOException ex) {
-	        Logger.getLogger(JavaPlugin.class.getName()).log(Level.SEVERE, "Could not save playerConfig to " + configFile, ex);
+	        Logger.getLogger(JavaPlugin.class.getName()).log(Level.SEVERE, "Could not save block list to " + configFile, ex);
 	    }
 		
 		return true;

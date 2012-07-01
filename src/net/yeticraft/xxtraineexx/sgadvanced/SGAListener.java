@@ -1,12 +1,10 @@
 package net.yeticraft.xxtraineexx.sgadvanced;
 
-import java.util.HashMap;
-import java.util.HashSet;
 
+import java.util.HashSet;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
@@ -33,7 +31,7 @@ public class SGAListener implements Listener{
 	public boolean setupPlatforms; 
 	public HashSet<SGABlockLoc> chestList;
 	public HashSet<SGABlockLoc> platformList;
-	public HashMap<Location, Block> blockLog = new HashMap<Location, Block>();
+	public HashSet<SGABlockLoc> blockLog = new HashSet<SGABlockLoc>();
 	
 	public SGAListener(SGAdvanced plugin) {
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -68,8 +66,7 @@ public class SGAListener implements Listener{
 		// Checking block to see if its on the break list. If so, allow break, log it, and return.
 		int blockType = e.getBlock().getTypeId();
 		if (plugin.breakableBlocks.contains(blockType)){
-		    // TODO: This need to be a copy of the object.. not a reference.
-		    blockLog.put(e.getBlock().getLocation(), e.getBlock());
+		    blockLog.add(new SGABlockLoc(e.getBlock()));
 		    return;
 		}
 		
@@ -115,7 +112,7 @@ public class SGAListener implements Listener{
     	
     	// Player is setting up platforms, and has permissions.
 		if (plugin.setPlatforms && e.getPlayer().hasPermission("sga.platforms")){
-			SGABlockLoc blockLoc = new SGABlockLoc(e.getBlock().getLocation());
+			SGABlockLoc blockLoc = new SGABlockLoc(e.getBlock());
 			
 			if (platformList.contains(blockLoc)){
 				platformList.remove(blockLoc);
@@ -129,7 +126,7 @@ public class SGAListener implements Listener{
 		
 		// If player is setting chests, has permissions, and the block is a chest.
         if (plugin.setChests && e.getPlayer().hasPermission("sga.chests")  && e.getBlock().getTypeId() == 54) {
-            SGABlockLoc blockLoc = new SGABlockLoc(e.getBlock().getLocation());
+            SGABlockLoc blockLoc = new SGABlockLoc(e.getBlock());
             
             if (chestList.contains(blockLoc)){
                 chestList.remove(blockLoc);
