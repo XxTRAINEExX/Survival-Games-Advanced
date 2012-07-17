@@ -5,14 +5,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class SGAConfigHandler {
@@ -23,8 +25,6 @@ public class SGAConfigHandler {
 	public SGAConfigHandler(SGAdvanced plugin) {
         SGAConfigHandler.plugin = plugin;
     }
-	
-	
 	
 	public boolean loadItems(){
 		
@@ -129,6 +129,65 @@ public class SGAConfigHandler {
 		
 		return true;
 	}
+	
+	/**
+	 * This method will save the players current inventory to disk.
+	 * @param playerName
+	 * @param itemStack
+	 * @return
+	 */
+	public boolean saveInventory (String playerName, ItemStack[] itemStack){
+	    File configFile = new File(plugin.getDataFolder() + "/players", playerName + ".yml");
+	    FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
+	    List<ItemStack> stack = Arrays.asList(itemStack);
+	    
+	    config.set(playerName, stack);
+        
+        try {
+            config.save(configFile);
+        } catch (IOException ex) {
+            Logger.getLogger(JavaPlugin.class.getName()).log(Level.SEVERE, "Could not save player inventory to " + configFile, ex);
+        }
+	    
+	    return true;
+	}
+	
+	/**
+	 * This method will load the players current inventory from disk.
+	 * @param listType
+	 * @return
+	 */
+	   public ItemStack[] loadInventory(String playerName){
+	        
+	        File configFile = new File(plugin.getDataFolder() + "/players", playerName + ".yml");
+	        FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
+	        
+	        if (!configFile.exists()){
+	            Logger.getLogger(JavaPlugin.class.getName()).log(Level.SEVERE, "Could not load player inventory from " + configFile);
+	            ItemStack[] itemStack = null;
+	            return itemStack;
+	        }
+	        
+	        @SuppressWarnings("unchecked")
+            List<ItemStack> stack = (List<ItemStack>) config.getList(playerName);
+	        ItemStack[] itemStack = (ItemStack[]) stack.toArray(); 
+	        return itemStack;
+	        
+	    }
+	   
+	   /**
+	    * WE use this method to clean up after a player has their items restored.
+	    * @param playerName
+	    * @return
+	    */
+	   public boolean deleteInventory(String playerName){
+	       boolean success = (new File(plugin.getDataFolder() + "/players", playerName + ".yml")).delete();
+	       if (success) {
+	           return true;
+	       }
+	       return false;
+	   }
+	
 	
 	/**
 	 * This method loads a HashSet from a custom yaml config file. The HashSet should be made of

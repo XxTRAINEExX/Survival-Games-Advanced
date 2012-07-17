@@ -16,18 +16,16 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-
 public class SGAEvents {
-	public static SGAdvanced plugin;
-	public boolean platformBoobyTrap;
-	public boolean deathmatch = false;
-	public HashMap<Player, Location> playerPlatform = new HashMap<Player, Location>();
-	public HashMap<Player, Location> playerHome = new HashMap<Player, Location>();
-	public HashMap<Player, ItemStack[]> playerInventory = new HashMap<Player, ItemStack[]>();
-	
-	public SGAEvents(SGAdvanced plugin) {
-		SGAEvents.plugin = plugin;	
-	}
+    public static SGAdvanced plugin;
+    public boolean platformBoobyTrap;
+    public boolean deathmatch = false;
+    public HashMap<Player, Location> playerPlatform = new HashMap<Player, Location>();
+    public HashMap<Player, Location> playerHome = new HashMap<Player, Location>();
+
+    public SGAEvents(SGAdvanced plugin) {
+        SGAEvents.plugin = plugin;	
+    }
 	
 	/**
 	 * This method will be used to teleport players to their respective
@@ -382,11 +380,9 @@ public class SGAEvents {
 	
 	public boolean unloadPlayerInventory(Player player){
 		
-	    //TODO: This needs to be a copy of the object... not a reference
-		// Putting the players inventory in a hashmap so we can get it later.
-		playerInventory.put(player, player.getInventory().getContents());
-		player.getInventory().clear();
-		//TODO: save these items to disk in case the server crashes
+	    // Storing the players inventory to disk
+	    plugin.customConfig.saveInventory(player.getName(), player.getInventory().getContents());
+	    player.getInventory().clear();
 		return true;
 	}
 	
@@ -396,11 +392,9 @@ public class SGAEvents {
 	 * @return
 	 */
 	public boolean loadPlayerInventory(Player player){
-	    
-	    // TODO: Make sure this is a copy of hte inventory we are restoring...
 	    player.getInventory().clear();
-	    player.getInventory().setContents(playerInventory.get(player));
-		//TODO: load all items from disk and return to player
-		return true;
+	    plugin.customConfig.loadInventory(player.getName());
+	    plugin.customConfig.deleteInventory(player.getName());
+	    return true;
 	}
 }
