@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.WorldCreator;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
@@ -68,7 +69,7 @@ public class SGAdvanced extends JavaPlugin{
 		getCommand("sgadvanced").setExecutor(SGACommandExecutor);
     	getCommand("sga").setExecutor(SGACommandExecutor);  
     	maxServerPlayers = this.getServer().getMaxPlayers();
-    	Bukkit.getServer().getWorld(worldName).setThunderDuration(40);
+    	loadSGAWorld();
     	log.info(prefix + " " + pdffile.getVersion() + " Enabled"); 	
     	
 	}
@@ -139,5 +140,9 @@ public class SGAdvanced extends JavaPlugin{
 		
 	}
 	
-
+	public void loadSGAWorld(){
+	    WorldCreator myWorldCreator = new WorldCreator(worldName);
+	    Bukkit.getServer().createWorld(myWorldCreator);
+	    Bukkit.getServer().getWorld(worldName).setThunderDuration(40);
+	}
 }

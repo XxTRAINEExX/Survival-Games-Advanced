@@ -4,11 +4,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
-
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.World.Environment;
+import org.bukkit.WorldCreator;
+import org.bukkit.WorldType;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -397,4 +401,90 @@ public class SGAEvents {
 	    plugin.customConfig.deleteInventory(player.getName());
 	    return true;
 	}
+	
+	public boolean createWorld(CommandSender sender, String worldName, String strSeed, String worldType, String strGenerate, String environment){
+
+	    if (Bukkit.getWorld(worldName)!=null){
+	        sender.sendMessage(ChatColor.AQUA + "World already exists. Try another name.");
+	        return false;
+	    }
+	    
+	    // Lets plant the seed!
+	    long seed = 0L;
+        if (strSeed.length() > 0) {
+            try {
+                long k = Long.parseLong(strSeed);
+
+                if (k != 0L) {
+                    seed = k;
+                }
+            } catch (NumberFormatException numberformatexception) {
+                seed = (long) strSeed.hashCode();
+            }
+        }
+	    
+	    boolean generate = Boolean.valueOf(strGenerate.toLowerCase());
+	    WorldType type;
+	    Environment env;
+	    
+	    // Setting World Type
+	    if (worldType.equalsIgnoreCase("NORMAL")){
+	        type = WorldType.NORMAL;    
+	    }
+	    else if (worldType.equalsIgnoreCase("FLAT")){
+	        type = WorldType.NORMAL;
+        }
+	    else if (worldType.equalsIgnoreCase("VERSION_1_1")){
+	        type = WorldType.NORMAL;
+        }
+	    else{
+	        sender.sendMessage(ChatColor.AQUA + "Invalid World type. Try \"NORMAL\",\"FLAT\",\"VERSION_1_1\".");
+	        return false;
+	    }
+	    
+	    // Setting Environment type
+	    if (environment.equalsIgnoreCase("NORMAL")){
+	        env = Environment.NORMAL;    
+        }
+        else if (environment.equalsIgnoreCase("NETHER")){
+            env = Environment.NETHER;
+        }
+        else if (environment.equalsIgnoreCase("THE_END")){
+            env = Environment.THE_END;
+        }
+        else{
+            sender.sendMessage(ChatColor.AQUA + "Invalid environment type. Try \"NORMAL\",\"NETHER\",\"THE_END\".");
+            return false;
+        }
+	    
+	    // Create the creator... wrap your mind around that 
+	    WorldCreator myWorldCreator = new WorldCreator(worldName);
+	    
+	    // Set all the properties
+	    myWorldCreator.seed(seed);
+	    myWorldCreator.type(type);
+	    myWorldCreator.generateStructures(generate);
+	    myWorldCreator.environment(env);
+	    
+	    
+	    // Create the world
+	    myWorldCreator.createWorld();
+	    return true;
+	}
+	
+	public boolean worldWarp(CommandSender sender, String worldName){
+	    
+	    if (Bukkit.getWorld(worldName)==null){
+	        sender.sendMessage(ChatColor.AQUA + "World does not exist.");
+	        return false;
+	    }
+	    Player player = (Player) sender;
+	    Location sgaLoc = new Location(Bukkit.getWorld(worldName), 0, 50, 0);
+	    Block highestBlock = Bukkit.getWorld(worldName).getHighestBlockAt(sgaLoc);
+	    Location finalLoc = highestBlock.getLocation();
+	    player.teleport(finalLoc);
+	    return true;
+	    
+	}
+	
 }

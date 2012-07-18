@@ -1,6 +1,6 @@
 name: SGAdvanced
 main: net.yeticraft.xxtraineexx.sgadvanced.SGAdvanced
-version: 0.4.2
+version: 0.4.4
 authors: [XxTRAINEExX]
 
 commands:
@@ -21,6 +21,8 @@ permissions:
             sga.reload: true
             sga.toggle: true
             sga.setupmode: true
+            sga.createworld: true
+            sga.worldwarp: true
     sga.command:
         description: Allows player access to SGA commands
         default: op
@@ -41,4 +43,10 @@ permissions:
         default: op
     sga.setupmode:
         description: Enables setup mode which turns off game-time functionality
+        default: op
+    sga.createworld:
+        description: Creates a new world for Survival Games
+        default: op
+    sga.worldwarp:
+        description: Creates a new world for Survival Games
         default: op

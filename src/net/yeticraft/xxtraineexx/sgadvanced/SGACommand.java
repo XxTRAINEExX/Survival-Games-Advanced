@@ -36,6 +36,8 @@ public class SGACommand implements CommandExecutor{
 		RELOAD,
 		TOGGLE,
 		SETUPMODE,
+		CREATEWORLD,
+		WORLDWARP,
 		UNKNOWN;
 		
 		private static SubCommand toSubCommand(String str) {
@@ -82,7 +84,7 @@ public class SGACommand implements CommandExecutor{
     	}
   	
   	// Too many params?
-  	if (args.length > 2) {
+  	if (args.length > 6) {
   		sender.sendMessage(ChatColor.DARK_AQUA + "SGAdvanced");
   		sender.sendMessage(ChatColor.DARK_AQUA + "==========");
   		sender.sendMessage(ChatColor.AQUA + "Looks like you typed too many parameters.");
@@ -108,6 +110,10 @@ public class SGACommand implements CommandExecutor{
 	    		if (sender.hasPermission("sga.debug")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " DEBUG: Enables DEBUG mode on the console.");
 	    		if (sender.hasPermission("sga.reload")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " RELOAD: Reloads config from disk.");
 	    		if (sender.hasPermission("sga.toggle")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " TOGGLE: Enables/Disables the plugin.");
+	    		if (sender.hasPermission("sga.setupmode")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " SETUPMODE: Swaps SGA to config mode.");
+                if (sender.hasPermission("sga.createworld")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " CREATEWORLD: Creates a new world for SGA.");
+                if (sender.hasPermission("sga.worldwarp")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " WORLDWARP: Teleports you to the SGA world.");
+                
 	    		return true;
 	
 	    	// ***************************** PALTFORMS COMMAND ****************************	    		
@@ -322,7 +328,7 @@ public class SGACommand implements CommandExecutor{
 	    	// ***************************** SETUPMODE  COMMAND ****************************	
 	      	case SETUPMODE:
 	      		sender.sendMessage(ChatColor.DARK_AQUA + "SGAdvanced SETUPMODE");
-	      		sender.sendMessage(ChatColor.DARK_AQUA + "=================");
+	      		sender.sendMessage(ChatColor.DARK_AQUA + "====================");
 	    		
 	    		// Check permissions for SETUPMODE command
     			if (!sender.hasPermission("sga.setupmode")) {
@@ -355,8 +361,52 @@ public class SGACommand implements CommandExecutor{
 	    		plugin.saveMainConfig();
 	    		return true;
 
-			// ***************************** UNKNOWN COMMAND ****************************					
-	    	case UNKNOWN:
+			// ***************************** CREATEWORLD COMMAND ****************************					
+	      	case CREATEWORLD:
+	      	  sender.sendMessage(ChatColor.DARK_AQUA + "SGAdvanced CREATEWORLD");
+              sender.sendMessage(ChatColor.DARK_AQUA + "======================");
+              
+              // Check permissions for CREATEWORLD command
+              if (!sender.hasPermission("sga.createworld")) {
+                  sender.sendMessage(ChatColor.AQUA + "Permissions DENIED.");
+                  return true;}
+              
+              // Check Params. Should be 5 params + 1 for createworld
+              if (args.length != 6){
+                  sender.sendMessage(ChatColor.AQUA + "Parameters are incorrect!");
+                  sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " CREATEWORLD <worldname> <seed> <worldtype> <structures> <environment>");
+                  sender.sendMessage(ChatColor.AQUA + "worldname: Name of your new world");
+                  sender.sendMessage(ChatColor.AQUA + "seed: Any letters/numbers you want to seed your new world");
+                  sender.sendMessage(ChatColor.AQUA + "worldtype: valid options are NORMAL, FLAT, VERSION_1_1");
+                  sender.sendMessage(ChatColor.AQUA + "structures: valid options are TRUE, FALSE");
+                  sender.sendMessage(ChatColor.AQUA + "environment: valid options are NORMAL, NETHER, THE_END");
+                  return true;}
+              
+              plugin.sgaEvents.createWorld(sender, args[1], args[2], args[3], args[4], args[5]);
+	      	  return true;
+	      	  
+	      	// ***************************** WORLDWARP COMMAND ****************************                   
+            case WORLDWARP:
+              sender.sendMessage(ChatColor.DARK_AQUA + "SGAdvanced WORLDWARP");
+              sender.sendMessage(ChatColor.DARK_AQUA + "====================");
+              
+              // Check permissions for WORLDWARP command
+              if (!sender.hasPermission("sga.worldwarp")) {
+                  sender.sendMessage(ChatColor.AQUA + "Permissions DENIED.");
+                  return true;}
+              
+              // Check Params. Should be 5 params + 1 for createworld
+              if (args.length != 2){
+                  sender.sendMessage(ChatColor.AQUA + "Incorrect parameters!");
+                  sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " WORLDWARP <worldname>");
+                  sender.sendMessage(ChatColor.AQUA + "worldname: Name of your sga world");
+                  return true;}
+              
+              plugin.sgaEvents.worldWarp(sender, args[1]);
+              return true;  
+	      	
+	      	// ***************************** UNKNOWN COMMAND ****************************
+	      	case UNKNOWN:
 	    		sender.sendMessage(ChatColor.DARK_AQUA + "SGAdvanced");
 	    		sender.sendMessage(ChatColor.DARK_AQUA + "==========");
 	    		sender.sendMessage(ChatColor.AQUA +  "Unknown command. Use /sga HELP to list available commands.");
