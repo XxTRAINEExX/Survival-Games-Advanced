@@ -14,18 +14,26 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class SGAConfigHandler {
 	
-
-	private static SGAdvanced plugin;
+private static SGAdvanced plugin;
 	
-	public SGAConfigHandler(SGAdvanced plugin) {
+/**
+ * This is the constructor for the SGAConfigHandler object. We expect a plugin object will be passed to this object on creation
+ * @param plugin
+ */
+public SGAConfigHandler(SGAdvanced plugin) {
         SGAConfigHandler.plugin = plugin;
-    }
-	
+        }
+
+/**
+ * This method will load all items from disk. If nothing is on the disk a default items.yml will be copied from within the JAR.
+ * @return
+ */
 	public boolean loadItems(){
 		
 		// Attaching to the file on disk.
@@ -113,6 +121,13 @@ public class SGAConfigHandler {
 		return true;
 	}
 	
+	/**
+	 * This method is used to save Blocks to disk. SGA currently uses this method to save both chests and platform locations to disk. (Since they are both blocks)
+	 * We pass in the name of the list we want to save (ie. chest) and the actual Hashset we want to save.
+	 * @param listType
+	 * @param listHash
+	 * @return
+	 */
 	public boolean saveBlocks(String listType, HashSet<SGABlockLoc> listHash){
 		
 		// Attaching to the file on disk.
@@ -136,18 +151,40 @@ public class SGAConfigHandler {
 	 * @param itemStack
 	 * @return
 	 */
-	public boolean saveInventory (String playerName, ItemStack[] itemStack){
-	    File configFile = new File(plugin.getDataFolder() + "/players", playerName + ".yml");
-	    FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
-	    List<ItemStack> stack = Arrays.asList(itemStack);
+	public boolean saveInventory (Player player){
 	    
-	    config.set(playerName, stack);
+		File configFile = new File(plugin.getDataFolder() + "/players", player.getName() + ".yml");
+	    FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
+	     
+        if (configFile.exists()){
+            Logger.getLogger(JavaPlugin.class.getName()).log(Level.SEVERE, "Inventory already exists on disk: " + configFile);
+            return false;
+        }
+        
+        ItemStack[] itemStack = player.getInventory().getContents();
+        List<ItemStack> stack = Arrays.asList(itemStack);
+ 	   
+	    
+	    // writing all inventory to disk
+	    config.set("inventory", stack);
+	    config.set("helmet", player.getInventory().getHelmet());
+	    config.set("boots", player.getInventory().getBoots());
+	    config.set("leggings", player.getInventory().getLeggings());
+	    config.set("chestplate", player.getInventory().getChestplate());
+	    
         
         try {
             config.save(configFile);
         } catch (IOException ex) {
             Logger.getLogger(JavaPlugin.class.getName()).log(Level.SEVERE, "Could not save player inventory to " + configFile, ex);
+            return false;
         }
+        
+        player.getInventory().clear();
+	    player.getInventory().setHelmet(null);
+	    player.getInventory().setBoots(null);
+	    player.getInventory().setLeggings(null);
+	    player.getInventory().setChestplate(null);
 	    
 	    return true;
 	}
@@ -157,21 +194,39 @@ public class SGAConfigHandler {
 	 * @param listType
 	 * @return
 	 */
-	   public ItemStack[] loadInventory(String playerName){
+	   public boolean loadInventory(Player player){
 	        
-	        File configFile = new File(plugin.getDataFolder() + "/players", playerName + ".yml");
+	        File configFile = new File(plugin.getDataFolder() + "/players", player.getName() + ".yml");
 	        FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
 	        
 	        if (!configFile.exists()){
 	            Logger.getLogger(JavaPlugin.class.getName()).log(Level.SEVERE, "Could not load player inventory from " + configFile);
-	            ItemStack[] itemStack = null;
-	            return itemStack;
+	            return false;
 	        }
 	        
+	        player.getInventory().clear();
+		    player.getInventory().setHelmet(null);
+		    player.getInventory().setBoots(null);
+		    player.getInventory().setLeggings(null);
+		    player.getInventory().setChestplate(null);
+	        
 	        @SuppressWarnings("unchecked")
-            List<ItemStack> stack = (List<ItemStack>) config.getList(playerName);
-	        ItemStack[] itemStack = (ItemStack[]) stack.toArray(); 
-	        return itemStack;
+            List<ItemStack> stack = (List<ItemStack>) config.get("inventory");
+	        
+	        // Iterating through itemstack and assigning to player
+	        for (int i=0;i<stack.size();i++) {
+	           if (stack.get(i) != null) player.getInventory().setItem(i,stack.get(i));
+	        }
+	        
+	        // bringing back the armor
+	        if (config.get("helmet") != null) player.getInventory().setHelmet((ItemStack) config.get("helmet"));
+	        if (config.get("boots") != null) player.getInventory().setBoots((ItemStack) config.get("boots"));
+	        if (config.get("leggings") != null) player.getInventory().setLeggings((ItemStack) config.get("leggings"));
+	        if (config.get("chestplate") != null) player.getInventory().setChestplate((ItemStack) config.get("chestplate"));
+	        
+	        // Clean up the file on disk
+	        plugin.customConfig.deleteInventory(player.getName());
+		    return true;
 	        
 	    }
 	   
@@ -218,6 +273,12 @@ public class SGAConfigHandler {
 		
 	}
 	
+	/**
+	 * The following method will copy a file from one place to another.
+	 * I use this to copy files out of the JAR and place them on disk
+	 * @param in
+	 * @param file
+	 */
 	private void copy(InputStream in, File file) {
 	    try {
 	        OutputStream out = new FileOutputStream(file);

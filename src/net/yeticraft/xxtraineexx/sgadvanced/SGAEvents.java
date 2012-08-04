@@ -27,6 +27,10 @@ public class SGAEvents {
     public HashMap<Player, Location> playerPlatform = new HashMap<Player, Location>();
     public HashMap<Player, Location> playerHome = new HashMap<Player, Location>();
 
+    /**
+     * This is the constructor for this object.
+     * @param plugin
+     */
     public SGAEvents(SGAdvanced plugin) {
         SGAEvents.plugin = plugin;	
     }
@@ -357,6 +361,11 @@ public class SGAEvents {
 	    return true;
 	}
 	
+	/**
+	 * The following method will regen the world to reset the map. We will pull all details 
+	 * from the hashmap and convert the changed blocks back to their original state.
+	 * @return
+	 */
 	public boolean regenWorld(){
 		
 	    // Iterate through the hashmap to replace each broken block
@@ -382,12 +391,18 @@ public class SGAEvents {
 	    return true;
 	}
 	
+	/**
+	 * The following method will unload the players current inventory so they can 
+	 * start playing SGA. We save their current inventory to disk and then clear their 
+	 * inventory
+	 * @param player
+	 * @return
+	 */
 	public boolean unloadPlayerInventory(Player player){
 		
 	    // Storing the players inventory to disk
-	    plugin.customConfig.saveInventory(player.getName(), player.getInventory().getContents());
-	    player.getInventory().clear();
-		return true;
+	    plugin.customConfig.saveInventory(player);
+	    return true;
 	}
 	
 	/**
@@ -396,12 +411,21 @@ public class SGAEvents {
 	 * @return
 	 */
 	public boolean loadPlayerInventory(Player player){
-	    player.getInventory().clear();
-	    plugin.customConfig.loadInventory(player.getName());
-	    plugin.customConfig.deleteInventory(player.getName());
+	    
+		plugin.customConfig.loadInventory(player);
 	    return true;
 	}
 	
+	/**
+	 * This method will create a new world to be used for SGA.
+	 * @param sender
+	 * @param worldName
+	 * @param strSeed
+	 * @param worldType
+	 * @param strGenerate
+	 * @param environment
+	 * @return
+	 */
 	public boolean createWorld(CommandSender sender, String worldName, String strSeed, String worldType, String strGenerate, String environment){
 
 	    if (Bukkit.getWorld(worldName)!=null){
@@ -472,6 +496,12 @@ public class SGAEvents {
 	    return true;
 	}
 	
+	/**
+	 * The following method allows an admin to teleport between SGA and the main world.
+	 * @param sender
+	 * @param worldName
+	 * @return
+	 */
 	public boolean worldWarp(CommandSender sender, String worldName){
 	    
 	    if (Bukkit.getWorld(worldName)==null){

@@ -33,6 +33,10 @@ public class SGAListener implements Listener{
 	public HashSet<SGABlockLoc> platformList;
 	public HashSet<SGABlockLoc> blockLog = new HashSet<SGABlockLoc>();
 	
+	/**
+	 * This is the constructor
+	 * @param plugin
+	 */
 	public SGAListener(SGAdvanced plugin) {
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 		SGAListener.plugin = plugin;
@@ -40,7 +44,10 @@ public class SGAListener implements Listener{
 		
 	}
 	
-	
+	/**
+	 * The following method kicks in when the plugin is enabled.
+	 * @param event
+	 */
 	public void onPluginEnable (PluginEnableEvent event) {
 		
 		plugin.log.info(("Plugin detected: " + event.getPlugin().toString()));
@@ -174,7 +181,7 @@ public class SGAListener implements Listener{
     }
     
     /**
-     * Monitoring this eveng because we want to prevent monsters targeting dead players.
+     * Monitoring this event because we want to prevent monsters targeting dead players.
      * We also use this event to stop XP orbs from traveling to dead players
      * @param event
      */

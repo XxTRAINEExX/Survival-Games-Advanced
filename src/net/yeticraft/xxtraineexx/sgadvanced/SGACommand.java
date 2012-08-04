@@ -38,6 +38,7 @@ public class SGACommand implements CommandExecutor{
 		SETUPMODE,
 		CREATEWORLD,
 		WORLDWARP,
+		ADMIN,
 		UNKNOWN;
 		
 		private static SubCommand toSubCommand(String str) {
@@ -113,6 +114,8 @@ public class SGACommand implements CommandExecutor{
 	    		if (sender.hasPermission("sga.setupmode")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " SETUPMODE: Swaps SGA to config mode.");
                 if (sender.hasPermission("sga.createworld")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " CREATEWORLD: Creates a new world for SGA.");
                 if (sender.hasPermission("sga.worldwarp")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " WORLDWARP: Teleports you to the SGA world.");
+                if (sender.hasPermission("sga.admin")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " ADMIN: Access to embedded methods for troubleshooting.");
+                
                 
 	    		return true;
 	
@@ -395,7 +398,7 @@ public class SGACommand implements CommandExecutor{
                   sender.sendMessage(ChatColor.AQUA + "Permissions DENIED.");
                   return true;}
               
-              // Check Params. Should be 5 params + 1 for createworld
+              // Check Params. Should be 2 params for worldwarp
               if (args.length != 2){
                   sender.sendMessage(ChatColor.AQUA + "Incorrect parameters!");
                   sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " WORLDWARP <worldname>");
@@ -404,6 +407,88 @@ public class SGACommand implements CommandExecutor{
               
               plugin.sgaEvents.worldWarp(sender, args[1]);
               return true;  
+           // ***************************** ADMIN COMMAND ****************************                   
+            case ADMIN:
+              sender.sendMessage(ChatColor.DARK_AQUA + "SGAdvanced ADMIN");
+              sender.sendMessage(ChatColor.DARK_AQUA + "================");
+              
+              // Check permissions for WORLDWARP command
+              if (!sender.hasPermission("sga.admin")) {
+                  sender.sendMessage(ChatColor.AQUA + "Permissions DENIED.");
+                  return true;}
+              
+              // Check Params. Should be 2 params
+              if (args.length != 2){
+            	  // These are methods in the Config class
+                  sender.sendMessage(ChatColor.AQUA + "Incorrect parameters!");
+                  sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " ADMIN CONFIG-LOADITEMS");
+                 
+                  // These are methods in the Event class
+                  sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " ADMIN TELEPORTPLAYERS");
+                  sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " ADMIN PLAYERDEATH");
+                  sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " ADMIN PLAYERLEAVE");
+                  sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " ADMIN STARTMATCH");
+                  sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " ADMIN ENDMATCH");
+                  sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " ADMIN DEATHMATCH");
+                  sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " ADMIN REGENWORLD");
+                  sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " ADMIN SPECTATEMATCH");
+                  sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " ADMIN FILLCHESTS");
+                  sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " ADMIN UNLOADINVENTORY");
+                  sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " ADMIN LOADINVENTORY");
+                  return true;}
+              
+              if (args[1].equalsIgnoreCase("CONFIG-LOADITEMS")){
+            	  plugin.customConfig.loadItems();
+            	  return true;
+              }
+
+              if (args[1].equalsIgnoreCase("TELEPORTPLAYERS")){
+            	  plugin.sgaEvents.teleportPlayers();
+            	  return true;
+              }
+              if (args[1].equalsIgnoreCase("PLAYERDEATH")){
+            	  plugin.sgaEvents.playerDeath((Player) sender);
+            	  return true;
+              }
+              if (args[1].equalsIgnoreCase("PLAYERLEAVE")){
+            	  plugin.sgaEvents.playerLeave((Player) sender);
+            	  return true;
+              }
+              if (args[1].equalsIgnoreCase("STARTMATCH")){
+            	  plugin.sgaEvents.startMatch();
+            	  return true;
+              }
+              if (args[1].equalsIgnoreCase("ENDMATCH")){
+            	  plugin.sgaEvents.endMatch();
+            	  return true;
+              }
+              if (args[1].equalsIgnoreCase("DEATHMATCH")){
+            	  plugin.sgaEvents.deathMatch();
+            	  return true;
+              }
+              if (args[1].equalsIgnoreCase("REGENWORLD")){
+            	  plugin.sgaEvents.regenWorld();
+            	  return true;
+              }
+              if (args[1].equalsIgnoreCase("SPECTATEMATCH")){
+            	  plugin.sgaEvents.spectateMatch((Player) sender);
+            	  return true;
+              }
+              if (args[1].equalsIgnoreCase("FILLCHESTS")){
+            	  plugin.sgaEvents.fillChests();
+            	  return true;
+              }
+              if (args[1].equalsIgnoreCase("UNLOADINVENTORY")){
+            	  plugin.sgaEvents.unloadPlayerInventory((Player) sender);
+            	  return true;
+              }
+              if (args[1].equalsIgnoreCase("LOADINVENTORY")){
+            	  plugin.sgaEvents.loadPlayerInventory((Player) sender);
+            	  return true;
+              }
+              
+              sender.sendMessage(ChatColor.AQUA + "Incorrect parameters!");
+             
 	      	
 	      	// ***************************** UNKNOWN COMMAND ****************************
 	      	case UNKNOWN:
