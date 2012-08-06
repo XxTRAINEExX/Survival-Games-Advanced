@@ -22,6 +22,7 @@ import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 
 
@@ -109,18 +110,29 @@ public class SGAListener implements Listener{
     public void onBlockDamage(BlockDamageEvent e) {
     	
     	// If plugin is disabled, exit.
-    	if (!plugin.pluginEnable) return;
+    	if (!plugin.pluginEnable){
+    	    if (plugin.debug) plugin.log.info("Plugin disabled. Not processing BlockDamageEvent");
+    	    return;
+    	}
+    	    
     	
     	// If world is not the survival games world, exit.
-    	if (!plugin.worldName.equalsIgnoreCase(e.getBlock().getWorld().toString())) return;
+    	if (!plugin.worldName.equalsIgnoreCase(e.getBlock().getWorld().getName())) {
+    	    if (plugin.debug) plugin.log.info("Current world: [" + e.getBlock().getWorld().toString() + "] is not SGA world: [" + plugin.worldName + "] Not processing BlockDamageEvent");
+    	    return;
+    	}
     	
 		// If the world is NOT currently being set up, we should NOT process the block damage event.
-		if (!plugin.setupMode) return;
+		if (!plugin.setupMode){
+		    if (plugin.debug) plugin.log.info("Plugin is NOT in SETUPMODE. Not processing BlockDamageEvent");
+		    return;
+		}
     	
     	// Player is setting up platforms, and has permissions.
 		if (plugin.setPlatforms && e.getPlayer().hasPermission("sga.platforms")){
 			SGABlockLoc blockLoc = new SGABlockLoc(e.getBlock());
 			
+            //TODO: This does not work... I'm comparing a new object to existing objects so it will never be true. I need to compare the contents of the object
 			if (platformList.contains(blockLoc)){
 				platformList.remove(blockLoc);
 				e.getPlayer().sendMessage(ChatColor.AQUA + "Platform removed from memory: " + e.getBlock().getLocation().toString());}
@@ -129,12 +141,16 @@ public class SGAListener implements Listener{
 				e.getPlayer().sendMessage(ChatColor.AQUA + "Platform added to memory: " + e.getBlock().getLocation().toString());}
 			e.getPlayer().sendMessage(ChatColor.AQUA + "When you are finished adding platforms, run the SET command again and SAVE");
 			e.setCancelled(true);
-			return;}
+			return;
+		}
+		if (plugin.debug) plugin.log.info("Either plugin is not enabled for SETPLATFORMS or player is missing the PLATFORMS permission.");
+        
 		
 		// If player is setting chests, has permissions, and the block is a chest.
         if (plugin.setChests && e.getPlayer().hasPermission("sga.chests")  && e.getBlock().getTypeId() == 54) {
             SGABlockLoc blockLoc = new SGABlockLoc(e.getBlock());
             
+            //TODO: This does not work... I'm comparing a new object to existing objects so it will never be true. I need to compare the contents of the object
             if (chestList.contains(blockLoc)){
                 chestList.remove(blockLoc);
                 e.getPlayer().sendMessage(ChatColor.AQUA + "Chest removed from memory: " + e.getBlock().getLocation().toString());}
@@ -143,7 +159,11 @@ public class SGAListener implements Listener{
                 e.getPlayer().sendMessage(ChatColor.AQUA + "Chest added to memory: " + e.getBlock().getLocation().toString());}
             e.getPlayer().sendMessage(ChatColor.AQUA + "When you are finished adding chests, run the SET command again and SAVE");
             e.setCancelled(true);
-            return;}
+            return;
+            
+        }
+        
+        if (plugin.debug) plugin.log.info("Either plugin is not enabled for SETCHESTS or player is missing the SETCHESTS permission.");
     }
     
     /**
@@ -154,8 +174,15 @@ public class SGAListener implements Listener{
     @EventHandler(priority = EventPriority.NORMAL)
     public void onEntityDamage(EntityDamageEvent event) {
         
+        
+        // If plugin is disabled, exit.
+        if (!plugin.pluginEnable) return;
+        
 		// If the world is currently being set up, we should not process the entity damage event.
 		if (plugin.setupMode) return;
+		
+	      // If world is not the survival games world, exit.
+        if (!plugin.worldName.equalsIgnoreCase(event.getEntity().getWorld().toString())) return;
     	
         if (event.isCancelled() || (event.getDamage() == 0)) return;
         Entity entity = event.getEntity();
@@ -188,8 +215,15 @@ public class SGAListener implements Listener{
     @EventHandler(priority = EventPriority.NORMAL)
     void onEntityTarget(EntityTargetEvent event) {
     	
+        
+        // If plugin is disabled, exit.
+        if (!plugin.pluginEnable) return;
+        
 		// If the world is currently being set up, we should not process the entity target event.
 		if (plugin.setupMode) return;
+		
+	      // If world is not the survival games world, exit.
+        if (!plugin.worldName.equalsIgnoreCase(event.getEntity().getWorld().toString())) return;
     	
         if (event.isCancelled()) return;
         Entity target = event.getTarget();
@@ -208,8 +242,14 @@ public class SGAListener implements Listener{
     @EventHandler(priority = EventPriority.NORMAL)
     void onItemPickUp(PlayerPickupItemEvent event) {
     	
+        // If plugin is disabled, exit.
+        if (!plugin.pluginEnable) return;
+        
 		// If the world is currently being set up, we should not process the onItemPickup event.
 		if (plugin.setupMode) return;
+		
+	      // If world is not the survival games world, exit.
+        if (!plugin.worldName.equalsIgnoreCase(event.getPlayer().getWorld().toString())) return;
     	
         if (event.isCancelled() ) return;
         Player player = event.getPlayer();
@@ -224,8 +264,14 @@ public class SGAListener implements Listener{
     @EventHandler(priority = EventPriority.NORMAL)
     void onItemDrop(PlayerDropItemEvent event) {
     	
+        // If plugin is disabled, exit.
+        if (!plugin.pluginEnable) return;
+        
 		// If the world is currently being set up, we should not process the onItemDrop event.
 		if (plugin.setupMode) return;
+		
+	      // If world is not the survival games world, exit.
+        if (!plugin.worldName.equalsIgnoreCase(event.getPlayer().getWorld().toString())) return;
     	
         if (event.isCancelled() ) return;
         Player player = event.getPlayer();
@@ -240,6 +286,15 @@ public class SGAListener implements Listener{
     @EventHandler(priority = EventPriority.NORMAL)
     void onPlayerMove(PlayerMoveEvent event){
     	
+        // If plugin is disabled, exit.
+        if (!plugin.pluginEnable) return;
+        
+        // If world is not the survival games world, exit.
+        if (!plugin.worldName.equalsIgnoreCase(event.getPlayer().getWorld().toString())) return;
+        
+        // If the world is currently being set up, we should not process the onItemDrop event.
+        if (plugin.setupMode) return;
+        
     	if (plugin.sgaEvents.platformBoobyTrap){
     	    // Looks like the platforms are booby trapped... we need to make sure no one is moving from their platform
     	    Player player = event.getPlayer();
@@ -262,5 +317,22 @@ public class SGAListener implements Listener{
     	}
     	
     }
+    @EventHandler(priority = EventPriority.NORMAL)
+    void onPlayerQuit(PlayerQuitEvent event) {
+
+        Player player = event.getPlayer();
+        // If plugin is disabled, exit.
+        if (!plugin.pluginEnable) return;
+        
+        // If the world is currently being set up, we should not process the onItemDrop event.
+        if (plugin.setupMode) return;
+        
+        // Remove disconnected player from all lists.
+        if (plugin.alivePlayerList.contains(player)) plugin.alivePlayerList.remove(player);
+        if (plugin.deadPlayerList.contains(player)) plugin.deadPlayerList.remove(player);
+        if (plugin.playerQueue.contains(player)) plugin.playerQueue.remove(player);
+        
+    }
+    
     
 }

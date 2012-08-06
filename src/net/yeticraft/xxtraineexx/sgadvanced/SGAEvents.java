@@ -41,14 +41,24 @@ public class SGAEvents {
 	 */
 	public boolean teleportPlayers(){
 		
+	    // Check to verify platforms have been set
+        if (plugin.sgaListener.platformList == null || plugin.sgaListener.platformList.size() <= 0){ 
+            if (plugin.debug) plugin.log.info(plugin.prefix + "No platforms have been set. Cancelling player teleportation.");
+            return false;
+        }
+
+	    
         //Loop through alive players and teleport them all to platforms
 	    Iterator<SGABlockLoc> itr = plugin.sgaListener.platformList.iterator();
 	    int i=0;
 	    while((itr.hasNext()) && (i < plugin.alivePlayerList.size())){
 	        SGABlockLoc platform = itr.next();
 	        Player currentPlayer = plugin.alivePlayerList.get(i);
+	        // Lets make a spot above the platform.
+	        Location platformLoc = platform.toLocation();
+	        Location abovePlatform  = new Location(platformLoc.getWorld(),platformLoc.getX(),(platformLoc.getY() + 1.5),platformLoc.getZ());
 	        // Teleport player to platform
-	        currentPlayer.teleport(platform.toLocation());
+	        currentPlayer.teleport(abovePlatform);
 	        // Assign player to platform
 	        playerPlatform.put(currentPlayer, platform.toLocation());
 	        if (plugin.debug) plugin.log.info("Teleporting [" + plugin.alivePlayerList.get(i) + "] to platform located at [" + platform.toString() + "]");
@@ -139,7 +149,7 @@ public class SGAEvents {
 	    leavingPlayer.removePotionEffect(PotionEffectType.SPEED);
         
 	    // giving back their items
-	    loadPlayerInventory(leavingPlayer);
+	    plugin.customConfig.loadInventory(leavingPlayer);
 
 	    // teleporting them to their home location
 		leavingPlayer.teleport(playerHome.get(leavingPlayer));
@@ -166,7 +176,8 @@ public class SGAEvents {
 			// Checking to see if they are already in the game
 			Player currentPlayer = plugin.alivePlayerList.get(i);
 			if (!currentPlayer.getWorld().equals(Bukkit.getWorld(plugin.worldName))){
-				unloadPlayerInventory(currentPlayer);
+				plugin.customConfig.unloadInventory(currentPlayer);
+
 			}
 			
 			
@@ -209,7 +220,7 @@ public class SGAEvents {
 	        // Making sure the aliveplayer does not have potion effect
 	        alivePlayer.removePotionEffect(PotionEffectType.SPEED);
 	        // Returning player items
-	        loadPlayerInventory(alivePlayer);
+	        plugin.customConfig.loadInventory(alivePlayer);
 	        // Teleport player to their home location
 	        alivePlayer.teleport(playerHome.get(alivePlayer));
 	        
@@ -260,7 +271,8 @@ public class SGAEvents {
 	        // clearing their SG inventory
 	        player.getInventory().clear();
 	        // giving back their real world inventory
-            loadPlayerInventory(player);
+            plugin.customConfig.loadInventory(player);
+
 
 	        // teleporting them to their home location
 	        player.teleport(playerHome.get(player));
@@ -286,7 +298,7 @@ public class SGAEvents {
             player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 6000, 0));
             
             // unload player inventory
-            unloadPlayerInventory(player);
+            plugin.customConfig.unloadInventory(player);
             // clearing their main world inventory
             player.getInventory().clear();
             
@@ -303,6 +315,12 @@ public class SGAEvents {
 	 * @return
 	 */
 	public boolean fillChests(){
+	    
+	    // Check to verify chests have been set already
+	    if (plugin.itemList == null || plugin.itemList.size() <= 0){ 
+	        if (plugin.debug) plugin.log.info(plugin.prefix + "No chests have been set. Cancelling chest fill.");
+	        return false;
+	    }
 	    
 	    // Making a deep copy of the itemList so we can manipulate it while not affecting the source itemList
 	    LinkedList<Integer> tempItemList = new LinkedList<Integer>(); // This is the temporary itemList we will be manipulating
@@ -368,6 +386,12 @@ public class SGAEvents {
 	 */
 	public boolean regenWorld(){
 		
+	       // Check to verify chests have been set already
+        if (plugin.sgaListener.blockLog == null || plugin.sgaListener.blockLog.size() <= 0){ 
+            if (plugin.debug) plugin.log.info(plugin.prefix + "No blocks have been changed.  Canceling world regen.");
+            return false;
+        }
+	    
 	    // Iterate through the hashmap to replace each broken block
 	    Iterator<SGABlockLoc> it = plugin.sgaListener.blockLog.iterator();
 	    while (it.hasNext()){
@@ -388,31 +412,6 @@ public class SGAEvents {
 	        }
 	    }
 	    
-	    return true;
-	}
-	
-	/**
-	 * The following method will unload the players current inventory so they can 
-	 * start playing SGA. We save their current inventory to disk and then clear their 
-	 * inventory
-	 * @param player
-	 * @return
-	 */
-	public boolean unloadPlayerInventory(Player player){
-		
-	    // Storing the players inventory to disk
-	    plugin.customConfig.saveInventory(player);
-	    return true;
-	}
-	
-	/**
-	 * This method will clear their current inventory and load the inventory from the hashmap
-	 * @param player
-	 * @return
-	 */
-	public boolean loadPlayerInventory(Player player){
-	    
-		plugin.customConfig.loadInventory(player);
 	    return true;
 	}
 	

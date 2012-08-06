@@ -39,6 +39,8 @@ public class SGACommand implements CommandExecutor{
 		CREATEWORLD,
 		WORLDWARP,
 		ADMIN,
+		JOIN,
+		LEAVE,
 		UNKNOWN;
 		
 		private static SubCommand toSubCommand(String str) {
@@ -106,7 +108,7 @@ public class SGACommand implements CommandExecutor{
 	    			return true;}
 	    		
 	    		sender.sendMessage(ChatColor.AQUA + " /" + command.getName() + " HELP: Shows this help page");
-	    		if (sender.hasPermission("sga.paltforms")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " PLATFORMS: Interact with platforms.");
+	    		if (sender.hasPermission("sga.platforms")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " PLATFORMS: Interact with platforms.");
 	    		if (sender.hasPermission("sga.chests")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " CHESTS: Interact with chests.");
 	    		if (sender.hasPermission("sga.debug")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " DEBUG: Enables DEBUG mode on the console.");
 	    		if (sender.hasPermission("sga.reload")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " RELOAD: Reloads config from disk.");
@@ -115,6 +117,8 @@ public class SGACommand implements CommandExecutor{
                 if (sender.hasPermission("sga.createworld")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " CREATEWORLD: Creates a new world for SGA.");
                 if (sender.hasPermission("sga.worldwarp")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " WORLDWARP: Teleports you to the SGA world.");
                 if (sender.hasPermission("sga.admin")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " ADMIN: Access to embedded methods for troubleshooting.");
+                if (sender.hasPermission("sga.join")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " JOIN: Adds you to the Survival Games Queue.");
+                if (sender.hasPermission("sga.leave")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " LEAVE: Removes you from the Survival Game Queue.");
                 
                 
 	    		return true;
@@ -479,16 +483,78 @@ public class SGACommand implements CommandExecutor{
             	  return true;
               }
               if (args[1].equalsIgnoreCase("UNLOADINVENTORY")){
-            	  plugin.sgaEvents.unloadPlayerInventory((Player) sender);
+            	  plugin.customConfig.unloadInventory((Player) sender);
             	  return true;
               }
               if (args[1].equalsIgnoreCase("LOADINVENTORY")){
-            	  plugin.sgaEvents.loadPlayerInventory((Player) sender);
+            	  plugin.customConfig.loadInventory((Player) sender);
             	  return true;
               }
               
               sender.sendMessage(ChatColor.AQUA + "Incorrect parameters!");
+              return true;
+            
+           // ***************************** JOIN COMMAND ****************************                   
+            case JOIN:
+              sender.sendMessage(ChatColor.DARK_AQUA + "SGAdvanced JOIN");
+              sender.sendMessage(ChatColor.DARK_AQUA + "===============");
+              
+              // Check permissions for WORLDWARP command
+              if (!sender.hasPermission("sga.join")) {
+                  sender.sendMessage(ChatColor.AQUA + "Permissions DENIED.");
+                  return true;}
+              
+              // Check Params. Should be 1
+              if (args.length != 1){
+                  sender.sendMessage(ChatColor.AQUA + "Incorrect parameters!");
+                  sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " JOIN");
+                  return true;}
+
+              // Check to verify platforms have been set
+              if (plugin.sgaListener.platformList == null || plugin.sgaListener.platformList.size() <= 0){ 
+                  sender.sendMessage(plugin.prefix + "Platforms have not been set yet. Cancelling your join.");
+                  return true;
+              } 
+              
+              // Adding player to aliveplayer list unless there are no more platforms. If there are
+              // no more platforms we will add them to the queue.
+              if (plugin.alivePlayerList.size() < plugin.sgaListener.platformList.size()){
+                  plugin.alivePlayerList.add((Player) sender);
+                  sender.sendMessage(plugin.prefix + "You have been added to the survival games. Please wait for the next match to begin.");
+              }
+              else{
+                  plugin.playerQueue.add((Player) sender);
+                  sender.sendMessage(plugin.prefix + "The survival games is currently full but you have been added to the queue.");
+                  sender.sendMessage(plugin.prefix + "Current Position: " + (plugin.playerQueue.indexOf((Player) sender) + 1));
+              }
+              
+              return true;
+              // ***************************** LEAVE COMMAND ****************************                   
+            case LEAVE:
+              sender.sendMessage(ChatColor.DARK_AQUA + "SGAdvanced LEAVE");
+              sender.sendMessage(ChatColor.DARK_AQUA + "================");
+              
+              // Check permissions for WORLDWARP command
+              if (!sender.hasPermission("sga.leave")) {
+                  sender.sendMessage(ChatColor.AQUA + "Permissions DENIED.");
+                  return true;}
+              
+              // Check Params. Should be 1
+              if (args.length != 1){
+                  sender.sendMessage(ChatColor.AQUA + "Incorrect parameters!");
+                  sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " LEAVE");
+                  return true;}
+              
+              player = (Player) sender;
+              // Checking to see if the player is currently in a list
+              if (!plugin.alivePlayerList.contains(player) && !plugin.deadPlayerList.contains(player) && !plugin.playerQueue.contains(player)){ 
+                  sender.sendMessage(plugin.prefix + "It's impossible to leave the game when you aren't participating.");
+                  return true;
+              } 
              
+              
+              plugin.sgaEvents.playerLeave((Player) sender);
+              return true;  
 	      	
 	      	// ***************************** UNKNOWN COMMAND ****************************
 	      	case UNKNOWN:

@@ -151,7 +151,7 @@ public SGAConfigHandler(SGAdvanced plugin) {
 	 * @param itemStack
 	 * @return
 	 */
-	public boolean saveInventory (Player player){
+	public boolean unloadInventory (Player player){
 	    
 		File configFile = new File(plugin.getDataFolder() + "/players", player.getName() + ".yml");
 	    FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);

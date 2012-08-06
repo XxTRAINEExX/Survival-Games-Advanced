@@ -61,7 +61,8 @@ public class SGABlockLoc implements ConfigurationSerializable{
         this.y = map.getDouble("y");
         this.z = map.getDouble("z");     
         this.typeId = map.getInt("typeId");
-        List<Byte> tempByteList = map.getByteList("data"); 
+        List<Byte> tempByteList = map.getByteList("data");
+        //TODO: This is a problem. The 0 shows up as an index out of bounds. Good times.
         this.data = tempByteList.get(0);
     }
  

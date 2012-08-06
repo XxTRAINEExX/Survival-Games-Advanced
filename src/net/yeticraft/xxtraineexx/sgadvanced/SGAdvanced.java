@@ -42,6 +42,7 @@ public class SGAdvanced extends JavaPlugin{
 	public boolean setChests;
 	public boolean setPlatforms;
 	public int maxServerPlayers;
+	public List<Integer> spawnLocValues;
 	LinkedList<Player> playerQueue = new LinkedList<Player>();
 	LinkedList<Player> alivePlayerList = new LinkedList<Player>();
 	LinkedList<Player> deadPlayerList = new LinkedList<Player>();
@@ -70,6 +71,7 @@ public class SGAdvanced extends JavaPlugin{
     	getCommand("sga").setExecutor(SGACommandExecutor);  
     	maxServerPlayers = this.getServer().getMaxPlayers();
     	loadSGAWorld();
+    	spawnLoc = new Location(Bukkit.getWorld(worldName), spawnLocValues.get(0).doubleValue(), spawnLocValues.get(1).doubleValue(), spawnLocValues.get(2).doubleValue());;
     	log.info(prefix + " " + pdffile.getVersion() + " Enabled"); 	
     	
 	}
@@ -97,10 +99,9 @@ public class SGAdvanced extends JavaPlugin{
         worldName = config.getString("worldName");
         setupMode = config.getBoolean("setupMode");
         deathmatchBoundary = config.getInt("deathmatchBoundary");
-        List<Integer> spawnLocValues = config.getIntegerList("spawnLoc");
-        Location spawnLoc = new Location(Bukkit.getWorld(worldName), spawnLocValues.get(0).doubleValue(), spawnLocValues.get(1).doubleValue(), spawnLocValues.get(2).doubleValue());;
-                
-    	log.info(prefix + "Config loaded.");
+        spawnLocValues = config.getIntegerList("spawnLoc");
+        
+        log.info(prefix + "Config loaded.");
     	
     	if (debug) {
     		log.info(prefix + "[pluginEnable: " + String.valueOf(pluginEnable) + "]");
@@ -109,7 +110,7 @@ public class SGAdvanced extends JavaPlugin{
     		log.info(prefix + "[worldName: " + worldName + "]");
     		log.info(prefix + "[setupMode: " + setupMode + "]");
     		log.info(prefix + "[deathmatchBoundary: " + deathmatchBoundary + "]");
-    		log.info(prefix + "[spawnLoc: " + spawnLoc.toString() + "]");
+    		log.info(prefix + "[spawnLoc: " + spawnLocValues.toString() + "]");
     		
 	}
 	
@@ -124,7 +125,7 @@ public class SGAdvanced extends JavaPlugin{
 		config.set("worldName", worldName);
 		config.set("setupMode", setupMode);
 		config.set("deathmatchBoundary", deathmatchBoundary);
-		config.set("spawnLoc", spawnLoc);
+		config.set("spawnLoc", spawnLocValues);
 		
 		saveConfig();
 		log.info(prefix + "Config saved.");
@@ -135,7 +136,7 @@ public class SGAdvanced extends JavaPlugin{
     		log.info(prefix + "[worldName: " + worldName + "]");
     		log.info(prefix + "[setupMode: " + setupMode + "]");
     		log.info(prefix + "[deathmatchBoundary: " + deathmatchBoundary + "]");
-    		log.info(prefix + "[spawnLoc: " + spawnLoc.toString() + "]");
+    		log.info(prefix + "[spawnLoc: " + spawnLocValues.toString() + "]");
 		}
 		
 	}

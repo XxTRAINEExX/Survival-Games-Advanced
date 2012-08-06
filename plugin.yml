@@ -1,6 +1,6 @@
 name: SGAdvanced
 main: net.yeticraft.xxtraineexx.sgadvanced.SGAdvanced
-version: 0.4.5
+version: 0.4.6
 authors: [XxTRAINEExX]
 
 commands:
@@ -24,6 +24,8 @@ permissions:
             sga.createworld: true
             sga.worldwarp: true
             sga.admin: true
+            sga.join: true
+            sga.leave: true
     sga.command:
         description: Allows player access to SGA commands
         default: op
@@ -53,4 +55,13 @@ permissions:
         default: op
     sga.admin:
         description: Gives access to specific java methods for testing purposes
+        default: op
+    sga.admin:
+        description: Gives access to specific java methods for testing purposes
+        default: op
+    sga.join:
+        description: Allows player to join the survival games
+        default: op
+    sga.leave:
+        description: Allows player to leave the survival games
         default: op
