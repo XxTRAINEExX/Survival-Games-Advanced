@@ -56,7 +56,7 @@ public class SGAEvents {
 	        Player currentPlayer = plugin.alivePlayerList.get(i);
 	        // Lets make a spot above the platform.
 	        Location platformLoc = platform.toLocation();
-	        Location abovePlatform  = new Location(platformLoc.getWorld(),platformLoc.getX(),(platformLoc.getY() + 1.5),platformLoc.getZ());
+	        Location abovePlatform  = new Location(platformLoc.getWorld(),(platformLoc.getX() + 0.5),(platformLoc.getY() + 1.5),(platformLoc.getZ() + 0.5));
 	        // Teleport player to platform
 	        currentPlayer.teleport(abovePlatform);
 	        // Assign player to platform

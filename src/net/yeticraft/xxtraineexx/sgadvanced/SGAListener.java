@@ -118,7 +118,7 @@ public class SGAListener implements Listener{
     	
     	// If world is not the survival games world, exit.
     	if (!plugin.worldName.equalsIgnoreCase(e.getBlock().getWorld().getName())) {
-    	    if (plugin.debug) plugin.log.info("Current world: [" + e.getBlock().getWorld().toString() + "] is not SGA world: [" + plugin.worldName + "] Not processing BlockDamageEvent");
+    	    if (plugin.debug) plugin.log.info("Current world: [" + e.getBlock().getWorld().getName() + "] is not SGA world: [" + plugin.worldName + "] Not processing BlockDamageEvent");
     	    return;
     	}
     	

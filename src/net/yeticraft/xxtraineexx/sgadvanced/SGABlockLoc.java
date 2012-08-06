@@ -1,7 +1,6 @@
 package net.yeticraft.xxtraineexx.sgadvanced;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.bukkit.Bukkit;
@@ -61,9 +60,7 @@ public class SGABlockLoc implements ConfigurationSerializable{
         this.y = map.getDouble("y");
         this.z = map.getDouble("z");     
         this.typeId = map.getInt("typeId");
-        List<Byte> tempByteList = map.getByteList("data");
-        //TODO: This is a problem. The 0 shows up as an index out of bounds. Good times.
-        this.data = tempByteList.get(0);
+        this.data = (byte) map.getInt("data");
     }
  
     public int getTypeId(){
@@ -93,7 +90,7 @@ public class SGABlockLoc implements ConfigurationSerializable{
         map.put("y", y);
         map.put("z", z);
         map.put("blockTypeId", typeId);
-        map.put("data", data);
+        map.put("data", ((int) data));
  
         return map;
     }
