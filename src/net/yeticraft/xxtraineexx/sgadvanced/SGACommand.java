@@ -41,6 +41,7 @@ public class SGACommand implements CommandExecutor{
 		ADMIN,
 		JOIN,
 		LEAVE,
+		SPECTATE,
 		UNKNOWN;
 		
 		private static SubCommand toSubCommand(String str) {
@@ -119,6 +120,7 @@ public class SGACommand implements CommandExecutor{
                 if (sender.hasPermission("sga.admin")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " ADMIN: Access to embedded methods for troubleshooting.");
                 if (sender.hasPermission("sga.join")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " JOIN: Adds you to the Survival Games Queue.");
                 if (sender.hasPermission("sga.leave")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " LEAVE: Removes you from the Survival Game Queue.");
+                if (sender.hasPermission("sga.spectate")) sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " SPECTATE: Toggles spectator mode for the player.");
                 
                 
 	    		return true;
@@ -499,7 +501,7 @@ public class SGACommand implements CommandExecutor{
               sender.sendMessage(ChatColor.DARK_AQUA + "SGAdvanced JOIN");
               sender.sendMessage(ChatColor.DARK_AQUA + "===============");
               
-              // Check permissions for WORLDWARP command
+              // Check permissions for JOIN command
               if (!sender.hasPermission("sga.join")) {
                   sender.sendMessage(ChatColor.AQUA + "Permissions DENIED.");
                   return true;}
@@ -552,8 +554,25 @@ public class SGACommand implements CommandExecutor{
                   return true;
               } 
              
+           // ***************************** SPECTATE COMMAND ****************************                   
+            case SPECTATE:
+              sender.sendMessage(ChatColor.DARK_AQUA + "SGAdvanced SPECTATE");
+              sender.sendMessage(ChatColor.DARK_AQUA + "===================");
               
-              plugin.sgaEvents.playerLeave((Player) sender);
+              // Check permissions for WORLDWARP command
+              if (!sender.hasPermission("sga.spectate")) {
+                  sender.sendMessage(ChatColor.AQUA + "Permissions DENIED.");
+                  return true;}
+              
+              // Check Params. Should be 1
+              if (args.length != 1){
+                  sender.sendMessage(ChatColor.AQUA + "Incorrect parameters!");
+                  sender.sendMessage(ChatColor.AQUA +  " /" + command.getName() + " SPECTATE");
+                  return true;}
+              
+              player = (Player) sender;
+              plugin.sgaEvents.spectateMatch(player);
+              
               return true;  
 	      	
 	      	// ***************************** UNKNOWN COMMAND ****************************

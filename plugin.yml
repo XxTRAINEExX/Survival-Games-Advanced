@@ -1,6 +1,6 @@
 name: SGAdvanced
 main: net.yeticraft.xxtraineexx.sgadvanced.SGAdvanced
-version: 0.4.6
+version: 0.4.7
 authors: [XxTRAINEExX]
 
 commands:
@@ -26,6 +26,7 @@ permissions:
             sga.admin: true
             sga.join: true
             sga.leave: true
+            sga.spectate: true
     sga.command:
         description: Allows player access to SGA commands
         default: op
@@ -64,4 +65,7 @@ permissions:
         default: op
     sga.leave:
         description: Allows player to leave the survival games
+        default: op
+    sga.spectate:
+        description: Allows player to spectate a match
         default: op
